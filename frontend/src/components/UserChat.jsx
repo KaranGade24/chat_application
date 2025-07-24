@@ -3,6 +3,7 @@ import styles from "./UserChat.module.css";
 import EmojiPicker from "emoji-picker-react";
 import EmptyChatPlaceholder from "./EmptyChatPlaceholder";
 import { AiOutlineSend } from "react-icons/ai";
+import defaultAvatar from "../assets/defaultAvatar.png"; // Assuming you have a default avatar image
 
 function UserChat({ selectedUser, onBack }) {
   const [userMessages, setUserMessages] = useState([]);
@@ -55,7 +56,7 @@ function UserChat({ selectedUser, onBack }) {
               </div>
             )}
             <img
-              src={selectedUser.profilePic}
+              src={selectedUser.profilePic || defaultAvatar}
               alt={selectedUser.name}
               className={styles.profilePic}
             />

@@ -1,18 +1,65 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+require("dotenv").config();
+const { connectDB } = require("./config/mongodbConnection");
+const { authenticate } = require("./authentication/authentication");
+const { Server } = require("socket.io");
+const http = require("http");
+const { socketfuntion } = require("./config/socket");
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://super-duper-capybara-vx7qrv4wv47h94p-5173.app.github.dev", // your frontend
+    credentials: true, // allow cookies to be sent
+  })
+);
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the Chat Application Backend");
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
+
+socketfuntion(io);
+
+// io.on("connection", (socket) => {
+//   console.log("New client connected");
+
+//   socket.on("disconnect", () => {
+//     console.log("Client disconnected");
+//   });
+// });
+
+//connections
+connectDB();
+
+//routes
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the Chat Application");
+});
+
+// Authentication routes
+const authRouter = require("./router/authentication");
+app.use("/auth", authRouter);
+
+// Fetch friends route
+const fetchFriendsRouter = require("./router/friends");
+app.use("/friends", authenticate, fetchFriendsRouter);
 
 const port = 8080;
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

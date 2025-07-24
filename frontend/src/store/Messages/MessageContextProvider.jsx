@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MessageContext from "./MessageContext";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import Socket from "../../../config/Socket";
 
-const user = [
+const userdummy = [
   {
     id: 1,
     name: "Aarav Sharma",
@@ -64,18 +68,87 @@ const user = [
   },
 ];
 
+export const useMessageContext = () => useContext(MessageContext);
+
 function MessageContextProvider({ children }) {
   const [selectedUser, setSelectedUser] = useState(null);
-  const [users, setUsers] = useState(user);
-  console.log("users:", users);
+  const [friendList, setFriendList] = useState(userdummy);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  // const navigate = useNavigate();
+
+  const fetchCurrentUser = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
+        withCredentials: true,
+      });
+
+      console.log("Fetched current user:", res.data);
+      setUser(res.data.user);
+    } catch (err) {
+      console.error("Auth error:", err?.response?.status, err?.response?.data);
+
+      // 401 Unauthorized
+      if (err?.response?.status === 401) {
+        setUser(null);
+        // navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFriendList = async (userId) => {
+    if (!userId) return;
+
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/friends/${userId}`,
+        { withCredentials: true }
+      );
+
+      console.log("Friend list:", res.data);
+      setFriendList(res.data.friends || []);
+    } catch (err) {
+      console.error(
+        "Error fetching friends:",
+        err?.response?.data || err.message
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (user && user._id) {
+      fetchFriendList(user._id);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const socket = Socket(user);
+    // return () => {
+    //   socket.disconnect();
+    // };
+  }, [user]);
 
   return (
     <MessageContext.Provider
       value={{
         selectedUser,
         setSelectedUser,
-        users,
-        setUsers,
+        users: friendList,
+        user,
+        loading,
+        setFriendList,
+        setUser,
+        setLoading,
       }}
     >
       {children}

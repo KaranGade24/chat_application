@@ -4,6 +4,11 @@ const MessageContext = createContext({
   selectedUser: null,
   setSelectedUser: () => {},
   users: [],
+  user: null,
+  loading: false,
+  setFriendList: () => {},
+  setUser: () => {},
+  setLoading: () => {},
 });
 
 export default MessageContext;

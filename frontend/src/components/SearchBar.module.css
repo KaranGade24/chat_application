@@ -56,7 +56,30 @@
   font-size: 1.8rem;
 }
 
-.userText {
+.profileBtn {
+  padding: 10px 20px;
+  background-color: transparent; /* Indigo-600 */
+  color: rgb(3, 3, 3);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
   font-size: 1rem;
-  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease-in-out, transform 0.15s ease;
+  box-shadow: 0 4px 14px rgba(183, 183, 187, 0.3);
+}
+
+.profileBtn:hover {
+  transform: translateY(-2px);
+}
+
+.profileBtn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .profileBtn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
 }

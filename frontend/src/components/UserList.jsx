@@ -1,31 +1,56 @@
 import React, { useContext, useState } from "react";
 import styles from "./UserList.module.css";
 import MessageContext from "../store/Messages/MessageContext";
+import { useMessageContext } from "../store/Messages/MessageContextProvider";
+import AddFriendModal from "./AddFriendModal";
+import defaultAvatar from "../assets/defaultAvatar.png"; // Assuming you have a default avatar image
 
 function UserList({ handleOnClick, selectedUser }) {
-  const { users } = useContext(MessageContext);
+  // const { users } = useContext(MessageContext);
+  const { users, user: currentUser } = useMessageContext();
+  console.log("Current User:", currentUser);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   console.log(users);
+
+  const handleAddClick = () => {
+    setIsModalOpen(true);
+  };
+
   return (
     <div className={styles.userList}>
-      <h2 className={styles.title}>Users</h2>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h2 className={styles.title}>Users</h2>
+        <button
+          onClick={() => handleAddClick()}
+          className={styles.addBtn}
+          title="Add Friend"
+        >
+          ➕
+        </button>
+      </div>
+      {isModalOpen && (
+        <AddFriendModal
+          user={currentUser}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
       <ul className={styles.userItems}>
-        {users.map((user) => (
+        {users.map((user, index) => (
           <li
             onClick={(e) => {
               handleOnClick(e, user);
-              console.log("clicked");
             }}
-            key={user.id}
+            key={index}
             className={styles.userItem}
             style={{
               backgroundColor:
-                selectedUser?.id === user.id
+                selectedUser?._id === user._id
                   ? "#968e8e9d"
                   : "hsl(0deg 0% 100%)",
             }}
           >
             <img
-              src={user.profilePic}
+              src={user.profilePic || defaultAvatar}
               alt={user.name}
               className={styles.profilePic}
             />

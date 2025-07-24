@@ -1,25 +1,69 @@
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import styles from "./Login.module.css";
-import { Navigate, NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
+import MessageContext from "../../store/Messages/MessageContext";
+import { toast } from "react-toastify";
 
 const Login = () => {
-  const navigate = Navigate();
+  const { setUser, setLoading } = useContext(MessageContext); // Assuming you have a context to set the user
+  const navigate = useNavigate();
   const onLogin = async (user) => {
     try {
-      const res = await axios.post("/api/login", {
-        email: user.email,
-        password: user.password,
-      });
-      if (res.ok) {
-        const userData = res.data;
-        localStorage.setItem("user", JSON.stringify(userData));
+      setLoading(true); // Set loading state to true
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/login`,
+        {
+          email: user.email,
+          password: user.password,
+        },
+        { withCredentials: true }
+      );
+      if (res.status === 200) {
+        const doc = res.data;
+        toast.success("Login successful!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light", // or "dark", "colored"
+          newestOnTop: true,
+          pauseOnFocusLoss: true,
+          rtl: false, // for right-to-left languages
+          icon: true, // or pass a custom icon component
+          role: "alert", // for accessibility
+        });
+        localStorage.setItem("user", JSON.stringify(doc));
+        setUser(doc.user);
         navigate("/app/chat");
       }
     } catch (err) {
       console.error("Login failed:", err);
-      alert("Login failed. Please check your credentials and try again.");
+      toast.error(
+        "Login failed. Please check your credentials and try again.",
+        {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light", // or "dark", "colored"
+          newestOnTop: true,
+          pauseOnFocusLoss: true,
+          rtl: false, // for right-to-left languages
+          icon: true, // or pass a custom icon component
+          role: "alert", // for accessibility
+        }
+      );
+      setUser(null); // Clear user state on error
       return;
+    } finally {
+      setLoading(false); // Set loading state to false after the request
     }
   };
   const email = useRef("");
@@ -32,8 +76,8 @@ const Login = () => {
     }
     // Simulate a login process
     const user = {
-      email: email.current,
-      password: password.current,
+      email: email.current.value,
+      password: password.current.value,
     };
     // Call the onLogin prop with the user data
     onLogin(user);
@@ -48,18 +92,14 @@ const Login = () => {
           <input
             type="email"
             placeholder="Email"
-            value={email.current}
             ref={email}
-            // onChange={(e) => setEmail(e.target.value)}
             className={styles.input}
             required
           />
           <input
             type="password"
             placeholder="Password"
-            value={password.current}
             ref={password}
-            // onChange={(e) => password.current =  (e.target.value)}
             className={styles.input}
             required
           />

@@ -1,16 +1,86 @@
 import React, { useState } from "react";
 import styles from "./Signup.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useRef } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
-const Signup = ({ onSignup }) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Signup = () => {
+  const navigate = useNavigate();
+  const name = useRef("");
+  const email = useRef("");
+  const password = useRef("");
+
+  const onSignup = async (user) => {
+    try {
+      // Make a POST request to the backend for registration
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/register`,
+        {
+          name: user.name,
+          email: user.email,
+          password: user.password,
+        },
+        { withCredentials: true }
+      );
+      if (res.status === 201) {
+        const doc = res.data;
+        toast.success("Signup successful!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light", // or "dark", "colored"
+          newestOnTop: true,
+          pauseOnFocusLoss: true,
+          rtl: false, // for right-to-left languages
+          icon: true, // or pass a custom icon component
+          role: "alert", // for accessibility
+        });
+        localStorage.setItem("user", JSON.stringify(doc));
+        navigate("/app/chat");
+      }
+    } catch (err) {
+      console.error("Signup failed:", err);
+      toast.error("Signup failed. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light", // or "dark", "colored"
+        newestOnTop: true,
+        pauseOnFocusLoss: true,
+        rtl: false, // for right-to-left languages
+        icon: true, // or pass a custom icon component
+        role: "alert", // for accessibility
+      });
+      return;
+    }
+  };
 
   const handleSignup = (e) => {
     e.preventDefault();
     // Replace with actual signup logic
-    onSignup({ name, email, password });
+    if (
+      !name.current.value ||
+      !email.current.value ||
+      !password.current.value
+    ) {
+      toast.info("Please fill in all fields");
+      return;
+    }
+    const user = {
+      name: name.current.value,
+      email: email.current.value,
+      password: password.current.value,
+    };
+    onSignup(user);
   };
 
   return (
@@ -22,27 +92,25 @@ const Signup = ({ onSignup }) => {
           <input
             type="text"
             placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            ref={name}
             className={styles.input}
             required
           />
+
           <input
             type="email"
             placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             className={styles.input}
+            ref={email}
             required
           />
           <input
             type="password"
             placeholder="Password (min 6 characters)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             className={styles.input}
             required
             minLength={6}
+            ref={password}
           />
           <button type="submit" className={styles.button}>
             Sign Up

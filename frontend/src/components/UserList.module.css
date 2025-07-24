@@ -20,6 +20,18 @@
   }
 }
 
+.addBtn {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  color: #0056b3;
+}
+
 .userItems {
   list-style: none;
   padding: 0;
