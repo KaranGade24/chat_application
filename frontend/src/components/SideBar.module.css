@@ -25,6 +25,10 @@
   background-color: rgba(255, 255, 255, 0.527);
   border-left: 3px solid orange;
 }
+.isSelected {
+  background-color: rgba(255, 255, 255, 0.527);
+  border-left: 3px solid orange;
+}
 .sidebar p:first-child {
   padding-top: 15px;
   border: 0px;

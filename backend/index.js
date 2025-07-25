@@ -58,6 +58,10 @@ app.use("/auth", authRouter);
 const fetchFriendsRouter = require("./router/friends");
 app.use("/friends", authenticate, fetchFriendsRouter);
 
+//message
+const messageRouter = require("./router/message");
+app.use("/messages", authenticate, messageRouter);
+
 const port = 8080;
 
 server.listen(port, () => {

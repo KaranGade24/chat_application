@@ -2,13 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 import { FaSearch, FaUserCircle } from "react-icons/fa";
 import styles from "./SearchBar.module.css";
 import MessageContext from "../store/Messages/MessageContext";
-import ProfileModal from "./ProfileModal";
+import { useNavigate } from "react-router-dom";
 
 function SearchBar() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { selectedUser } = useContext(MessageContext);
   const [isMobile, setIsMobile] = useState(false);
-  const { user } = useContext(MessageContext);
+  const navigate = useNavigate();
 
   const handleResize = () => {
     setIsMobile(window.innerWidth <= 768); // True if mobile size, false if not
@@ -45,21 +44,12 @@ function SearchBar() {
         <button
           onClick={(e) => {
             e.preventDefault();
-            setIsModalOpen(true);
+            navigate("/app/profile");
           }}
           className={styles.profileBtn}
         >
           Profile
         </button>
-        <ProfileModal
-          user={user}
-          isOpen={isModalOpen}
-          onClose={(e) => {
-            e.preventDefault();
-            setIsModalOpen(false);
-          }}
-          // onUpdate={handleUpdate}
-        />
       </div>
     </div>
   );

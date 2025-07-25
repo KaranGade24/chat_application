@@ -41,7 +41,7 @@ const Signup = () => {
           role: "alert", // for accessibility
         });
         localStorage.setItem("user", JSON.stringify(doc));
-        navigate("/app/chat");
+        navigate("/app");
       }
     } catch (err) {
       console.error("Signup failed:", err);

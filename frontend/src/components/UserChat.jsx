@@ -4,13 +4,18 @@ import EmojiPicker from "emoji-picker-react";
 import EmptyChatPlaceholder from "./EmptyChatPlaceholder";
 import { AiOutlineSend } from "react-icons/ai";
 import defaultAvatar from "../assets/defaultAvatar.png"; // Assuming you have a default avatar image
+import Socket from "../../config/Socket";
+import { useContext } from "react";
+import messageContext from "../store/Messages/MessageContext";
 
 function UserChat({ selectedUser, onBack }) {
   const [userMessages, setUserMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
+  const { user } = useContext(messageContext);
+  const socket = Socket();
+  console.log(selectedUser, user);
   useEffect(() => {
     if (selectedUser) {
       setUserMessages(selectedUser.Messages || []);
@@ -20,9 +25,29 @@ function UserChat({ selectedUser, onBack }) {
   const handleSend = () => {
     if (!input.trim()) return;
     const newMessage = { from: "me", text: input };
+    // const toMessage = { from: "to", text: "hello" };
     setUserMessages((prev) => [...prev, newMessage]);
+    socket.emit("send-message", {sender:user._id,receiver:selectedUser._id, message:input }, (acknowledgement) => {
+      console.log("Server acknowledged message:", acknowledgement);
+    });
     setInput("");
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("receive-message", ({ userId, message }) => {
+      // Optionally check if the message is from the currently selected user
+      setUserMessages((prev) => [...prev, { from: "user", text: message }]);
+    });
+
+    // Clean up the socket listener on unmount
+    return () => {
+      socket.off("receive-message");
+    };
+  }, [socket]);
+
+  // console.log("user message:", userMessages);
 
   const handleEmojiClick = (emoji) => {
     setInput((prev) => prev + emoji.emoji);

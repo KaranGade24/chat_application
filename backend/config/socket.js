@@ -15,6 +15,7 @@ exports.socketfuntion = (io) => {
 
     // 💬 Receive a new message
     socket.on("send-message", async ({ sender, receiver, message }) => {
+      console.log({ sender, receiver, message });
       if (!sender || !receiver || !message) return;
 
       const newMessage = await Message.create({
@@ -23,11 +24,11 @@ exports.socketfuntion = (io) => {
         message,
       });
 
-      const senderSocketId = userSocketMap.get(sender);
+      // const senderSocketId = userSocketMap.get(sender);
       const receiverSocketId = userSocketMap.get(receiver);
 
-      const frontendMessageForSender = { from: "me", text: message };
-      const frontendMessageForReceiver = { from: "user", text: message };
+      // const frontendMessageForSender = { from: "me", text: message };
+      const frontendMessageForReceiver = message;
 
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("receive-message", {
@@ -36,12 +37,12 @@ exports.socketfuntion = (io) => {
         });
       }
 
-      if (senderSocketId) {
-        io.to(senderSocketId).emit("message-sent", {
-          userId: receiver,
-          message: frontendMessageForSender,
-        });
-      }
+      // if (senderSocketId) {
+      //   io.to(senderSocketId).emit("message-sent", {
+      //     userId: receiver,
+      //     message: frontendMessageForSender,
+      //   });
+      // }
     });
 
     // 📴 Handle disconnect

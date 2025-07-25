@@ -38,7 +38,7 @@ const Login = () => {
         });
         localStorage.setItem("user", JSON.stringify(doc));
         setUser(doc.user);
-        navigate("/app/chat");
+        navigate("/app");
       }
     } catch (err) {
       console.error("Login failed:", err);

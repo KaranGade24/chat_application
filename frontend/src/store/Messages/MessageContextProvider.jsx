@@ -72,9 +72,10 @@ export const useMessageContext = () => useContext(MessageContext);
 
 function MessageContextProvider({ children }) {
   const [selectedUser, setSelectedUser] = useState(null);
-  const [friendList, setFriendList] = useState(userdummy);
+  const [friendList, setFriendList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [messageLoadFriendList, setMessageLoadFriendList] = useState([]);
   // const navigate = useNavigate();
 
   const fetchCurrentUser = async () => {
@@ -121,6 +122,60 @@ function MessageContextProvider({ children }) {
     }
   };
 
+  const getMessagesOnUserSelect = async (senderId, receiverId) => {
+    try {
+      console.log("in sencond fun");
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/messages`,
+        {
+          params: { senderId, receiverId },
+          withCredentials: true,
+        }
+      );
+
+      const formatted = response.data.map((msg) => {
+        console.log(msg.sender, msg.receiver);
+        return {
+          from: msg.sender === senderId ? "me" : "user",
+          text: msg.message,
+        };
+      });
+
+      return formatted;
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      return [];
+    }
+  };
+
+  const updateFriendMessages = async (senderId, receiverId) => {
+    console.log("in first func");
+
+    setMessageLoadFriendList((prev) => {
+      if (
+        prev.map((id) => {
+          if (id === receiverId) return;
+        })
+      )
+        [...prev, receiverId];
+    });
+
+    setFriendList((prevList) => {
+      const alreadyHasMessages = prevList.find(
+        (f) => f._id === receiverId && f.Messages?.length > 0
+      );
+      if (alreadyHasMessages) return prevList; // ✅ skip fetch
+      return prevList;
+    });
+    const messages = await getMessagesOnUserSelect(senderId, receiverId);
+
+    setFriendList((prevList) =>
+      prevList.map((friend) =>
+        friend._id === receiverId ? { ...friend, Messages: messages } : friend
+      )
+    );
+  };
+
   useEffect(() => {
     fetchCurrentUser();
   }, []);
@@ -133,10 +188,12 @@ function MessageContextProvider({ children }) {
 
   useEffect(() => {
     const socket = Socket(user);
-    // return () => {
-    //   socket.disconnect();
-    // };
-  }, [user]);
+    if (selectedUser && user) {
+      console.log("in selected uder to get msgss");
+      updateFriendMessages(user._id, selectedUser._id);
+      console.log(selectedUser);
+    }
+  }, [user, selectedUser]);
 
   return (
     <MessageContext.Provider
@@ -149,6 +206,7 @@ function MessageContextProvider({ children }) {
         setFriendList,
         setUser,
         setLoading,
+        updateFriendMessages,
       }}
     >
       {children}
