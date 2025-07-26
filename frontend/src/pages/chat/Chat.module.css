@@ -1,6 +1,6 @@
 .chatContainer {
   display: flex;
-  height: calc(100vh - 6vh); /* Adjusting for header height */
+  height: calc(100vh - 10vh); /* Adjusting for header height */
   width: 100%;
   margin-top: 15px;
 

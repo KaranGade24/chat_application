@@ -136,6 +136,7 @@ function MessageContextProvider({ children }) {
       const formatted = response.data.map((msg) => {
         console.log(msg.sender, msg.receiver);
         return {
+          _id: msg.sender === senderId ? senderId : msg.receiver,
           from: msg.sender === senderId ? "me" : "user",
           text: msg.message,
         };
@@ -151,22 +152,6 @@ function MessageContextProvider({ children }) {
   const updateFriendMessages = async (senderId, receiverId) => {
     console.log("in first func");
 
-    setMessageLoadFriendList((prev) => {
-      if (
-        prev.map((id) => {
-          if (id === receiverId) return;
-        })
-      )
-        [...prev, receiverId];
-    });
-
-    setFriendList((prevList) => {
-      const alreadyHasMessages = prevList.find(
-        (f) => f._id === receiverId && f.Messages?.length > 0
-      );
-      if (alreadyHasMessages) return prevList; // ✅ skip fetch
-      return prevList;
-    });
     const messages = await getMessagesOnUserSelect(senderId, receiverId);
 
     setFriendList((prevList) =>
@@ -190,8 +175,9 @@ function MessageContextProvider({ children }) {
     const socket = Socket(user);
     if (selectedUser && user) {
       console.log("in selected uder to get msgss");
+      if (messageLoadFriendList.includes(selectedUser._id)) return;
+      setMessageLoadFriendList((prev) => [...prev, selectedUser._id]);
       updateFriendMessages(user._id, selectedUser._id);
-      console.log(selectedUser);
     }
   }, [user, selectedUser]);
 
@@ -203,10 +189,12 @@ function MessageContextProvider({ children }) {
         users: friendList,
         user,
         loading,
-        setFriendList,
+        setUsers: setFriendList,
         setUser,
         setLoading,
         updateFriendMessages,
+        setMessageLoadFriendList,
+        messageLoadFriendList,
       }}
     >
       {children}

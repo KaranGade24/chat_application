@@ -1,136 +1,250 @@
-import React, { useEffect, useState } from "react";
+// src/components/UserChat/UserChat.jsx
+import { useEffect, useState, useMemo } from "react";
 import styles from "./UserChat.module.css";
 import EmojiPicker from "emoji-picker-react";
 import EmptyChatPlaceholder from "./EmptyChatPlaceholder";
 import { AiOutlineSend } from "react-icons/ai";
-import defaultAvatar from "../assets/defaultAvatar.png"; // Assuming you have a default avatar image
+import defaultAvatar from "../assets/defaultAvatar.png";
 import Socket from "../../config/Socket";
-import { useContext } from "react";
-import messageContext from "../store/Messages/MessageContext";
+import { useMessageContext } from "../store/Messages/MessageContextProvider";
+import { ClipLoader } from "react-spinners";
+import UserInfoModal from "./UserInfoModal";
 
-function UserChat({ selectedUser, onBack }) {
+export default function UserChat({ selectedUser, onBack }) {
+  const {
+    user,
+    updateFriendMessages,
+    setMessageLoadFriendList,
+    messageLoadFriendList,
+    users,
+    setUsers,
+  } = useMessageContext();
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [userMessages, setUserMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const { user } = useContext(messageContext);
-  const socket = Socket();
-  console.log(selectedUser, user);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  // Initialize socket once per user
+  const socket = useMemo(() => {
+    if (!user) return null;
+    return Socket(user);
+  }, [user]);
+
   useEffect(() => {
-    if (selectedUser) {
-      setUserMessages(selectedUser.Messages || []);
+    if (!socket || !selectedUser) return;
+
+    if (input.trim() === "") return;
+
+    socket.emit("isTyping", {
+      isTyping: true,
+      receiverId: selectedUser._id,
+    });
+
+    const timeout = setTimeout(() => {
+      socket.emit("isTyping", {
+        isTyping: false,
+        receiverId: selectedUser._id,
+      });
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [input]);
+
+  useEffect(() => {
+    if (!socket || !selectedUser || !user) {
+      return;
     }
-  }, [selectedUser]);
+
+    console.log({ socket, selectedUser, user });
+    const handleTyping = ({ isTyping, senderId }) => {
+      console.log("📩 Typing event received:", {
+        isTyping,
+        senderId,
+        userId: user._id,
+      });
+
+      // Show typing only if the selectedUser (friend) is the one typing
+      if (user._id === senderId) {
+        console.log("istyping.........");
+        setIsTyping(isTyping);
+      }
+    };
+
+    socket.on("isTyping", handleTyping);
+    console.log("selected user:", selectedUser);
+
+    return () => {
+      socket.off("isTyping", handleTyping); // cleanup
+    };
+  }, [socket, selectedUser, user]);
+
+  // When selectedUser changes, load their messages
+  useEffect(() => {
+    if (!selectedUser || !user) {
+      setUserMessages([]);
+      return;
+    }
+    setLoadingMessages(true);
+    if (messageLoadFriendList.includes(selectedUser._id)) {
+      const updated = users.find((u) => u._id === selectedUser._id);
+      setUserMessages(updated?.Messages || []);
+      setLoadingMessages(false);
+      return;
+    }
+
+    setMessageLoadFriendList((prev) => [...prev, selectedUser._id]);
+
+    updateFriendMessages(user._id, selectedUser._id).then(() => {
+      const updated = users.find((u) => u._id === selectedUser._id);
+      setUserMessages(updated?.Messages || []);
+      setLoadingMessages(false);
+    });
+  }, [selectedUser, user, users]);
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    const chatBody = document.querySelector(`.${styles.chatBody}`);
+    if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+  }, [userMessages]);
+
+  // Listen for incoming messages over socket
+  useEffect(() => {
+    if (!socket || !selectedUser) return;
+
+    const handleReceive = ({ userId, message }) => {
+      if (userId === selectedUser._id) {
+        setUserMessages((prev) => [
+          ...prev,
+          { _id: userId, from: "user", text: message },
+        ]);
+
+        // Update context (so future reload has the message)
+        setUsers((prevUsers) =>
+          prevUsers.map((u) =>
+            u._id === selectedUser._id
+              ? {
+                  ...u,
+                  Messages: [
+                    ...(u.Messages || []),
+                    { _id: userId, from: "user", text: message },
+                  ],
+                }
+              : u
+          )
+        );
+      }
+    };
+
+    socket.on("receive-message", handleReceive);
+    return () => {
+      socket.off("receive-message", handleReceive);
+    };
+  }, [socket, selectedUser]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
-    const newMessage = { from: "me", text: input };
-    // const toMessage = { from: "to", text: "hello" };
+    const text = input.trim();
+    if (!text || !selectedUser || !user) return;
+
+    const newMessage = { _id: user._id, from: "me", text };
+
+    // Locally update visible messages
     setUserMessages((prev) => [...prev, newMessage]);
-    socket.emit("send-message", {sender:user._id,receiver:selectedUser._id, message:input }, (acknowledgement) => {
-      console.log("Server acknowledged message:", acknowledgement);
+
+    // Emit the message
+    socket.emit("send-message", {
+      sender: user._id,
+      receiver: selectedUser._id,
+      message: text,
     });
+
+    // ✅ Also update context (users list)
+    setUsers((prevUsers) =>
+      prevUsers.map((u) =>
+        u._id === selectedUser._id
+          ? {
+              ...u,
+              Messages: [...(u.Messages || []), newMessage],
+            }
+          : u
+      )
+    );
+
     setInput("");
   };
 
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("receive-message", ({ userId, message }) => {
-      // Optionally check if the message is from the currently selected user
-      setUserMessages((prev) => [...prev, { from: "user", text: message }]);
-    });
-
-    // Clean up the socket listener on unmount
-    return () => {
-      socket.off("receive-message");
-    };
-  }, [socket]);
-
-  // console.log("user message:", userMessages);
-
-  const handleEmojiClick = (emoji) => {
-    setInput((prev) => prev + emoji.emoji);
+  const handleEmojiClick = (emojiData) => {
+    setInput((prev) => prev + emojiData.emoji);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const newMessage = { from: "me", text: `📎 Sent file: ${file.name}` };
-      setUserMessages((prev) => [...prev, newMessage]);
-    }
+  const handleHeaderClick = () => {
+    setShowModal(true);
   };
-
-  useEffect(() => {
-    if (input) {
-      setIsTyping(true);
-      const timeout = setTimeout(() => setIsTyping(false), 1000);
-      return () => clearTimeout(timeout);
-    }
-  }, [input]);
 
   return (
     <div className={styles.userChat}>
       {selectedUser ? (
         <>
-          {/* Header */}
-          <div className={styles.header}>
+          <div className={styles.header} onClick={handleHeaderClick}>
             {onBack && (
-              <div className={styles.backArrow} onClick={onBack}>
-                &larr;
-              </div>
+              <button
+                className={styles.backBtn}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onBack();
+                }}
+              >
+                ← Back
+              </button>
             )}
             <img
               src={selectedUser.profilePic || defaultAvatar}
               alt={selectedUser.name}
               className={styles.profilePic}
             />
-            <div>
-              <h3 className={styles.userName}>{selectedUser.name}</h3>
-              <span
-                className={`${styles.status} ${styles[selectedUser.status]}`}
-              >
-                {selectedUser.status}
+            <div className={styles.userInfo}>
+              <h3>{selectedUser.name}</h3>
+              <span className={styles.status}>
+                {selectedUser.isOnline ? "online" : "last seen: todo"}
               </span>
+              {isTyping && (
+                <div className={styles.typingIndicator}>Typing...</div>
+              )}
             </div>
           </div>
+          {/* by clicking  on the header  selected user info model is visible */}
+          {showModal && (
+            <UserInfoModal
+              user={selectedUser}
+              onClose={() => setShowModal(false)}
+            />
+          )}
 
-          {/* Chat Body */}
           <div className={styles.chatBody}>
-            {userMessages.map((msg, index) => (
-              <div
-                key={index}
-                className={
-                  msg.from === "me" ? styles.myMessage : styles.theirMessage
-                }
-              >
-                {msg.text}
+            {loadingMessages ? (
+              <div className={styles.loadingMsg}>
+                <ClipLoader size={40} color="blue" />
               </div>
-            ))}
-            {isTyping && (
-              <div className={styles.typingIndicator}>
-                {selectedUser.name} is typing
-                <span className={styles.dots}>
-                  <span>.</span>
-                  <span>.</span>
-                  <span>.</span>
-                </span>
-              </div>
+            ) : (
+              userMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={
+                    msg.from === "me" ? styles.myMessage : styles.theirMessage
+                  }
+                >
+                  {msg.text}
+                </div>
+              ))
             )}
           </div>
 
-          {/* Input Area */}
           <div className={styles.inputArea}>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Type a message..."
-              className={styles.input}
-            />
-
-            {/* <button onClick={() => setShowEmojiPicker((prev) => !prev)}>
+            <button
+              className={styles.emojiBtn}
+              onClick={() => setShowEmojiPicker((v) => !v)}
+            >
               😊
             </button>
             {showEmojiPicker && (
@@ -138,13 +252,16 @@ function UserChat({ selectedUser, onBack }) {
                 <EmojiPicker onEmojiClick={handleEmojiClick} />
               </div>
             )}
-            <label className={styles.fileUpload}>
-              📎
-              <input type="file" onChange={handleFileChange} hidden />
-            </label> */}
-
-            <button onClick={handleSend} className={styles.sendBtn}>
-              <AiOutlineSend size={15} />
+            <input
+              className={styles.input}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Type a message..."
+            />
+            <button className={styles.sendBtn} onClick={handleSend}>
+              <AiOutlineSend size={20} />
             </button>
           </div>
         </>
@@ -154,5 +271,3 @@ function UserChat({ selectedUser, onBack }) {
     </div>
   );
 }
-
-export default UserChat;

@@ -1,13 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./AddFriendModal.module.css";
 import axios from "axios";
 import { useMessageContext } from "../store/Messages/MessageContextProvider";
 import { toast } from "react-toastify";
+import Socket from "../../config/Socket";
 
 const AddFriendModal = ({ user, onClose }) => {
   const [email, setEmail] = useState("");
-  const { setFriendList } = useMessageContext();
+  const { setUsers, users, selectedUser } = useMessageContext();
   console.log("User in AddFriendModal:", user);
+  const socket = Socket(user);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleAddUser = (newUser) => {
+      // Ensure newUser is not already in the list
+      const exists = users.some((u) => u._id === newUser._id);
+      if (!exists) {
+        // Optional: check if it's the selected user
+        if (!selectedUser || newUser._id === user._id) {
+          setUsers((prev) => [...prev, newUser]);
+        }
+      }
+    };
+
+    socket.on("add-user", handleAddUser);
+
+    // Cleanup
+    return () => {
+      socket.off("add-user", handleAddUser);
+    };
+  }, [socket, users, selectedUser, setUsers]);
+
   const handleSubmit = async () => {
     try {
       if (!email) return;
@@ -21,6 +46,13 @@ const AddFriendModal = ({ user, onClose }) => {
         { withCredentials: true }
       );
 
+      // console.log(response.data.friend._id);
+      if (response.status === 200) {
+      }
+      socket.emit("add-user", {
+        newUser: response.data.friend,
+        userId: response.data.friend._id,
+      });
       // console.log(response.data.message); // "Friend added successfully"
       toast.success("Friend added successfully!", {
         position: "top-right",
@@ -37,14 +69,9 @@ const AddFriendModal = ({ user, onClose }) => {
         icon: true, // or pass a custom icon component
         role: "alert", // for accessibility
       });
-      setFriendList((prev) => [response.data.friend, ...prev]);
+      setUsers((prev) => [response.data.friend, ...prev]);
       onClose(); // Close the modal
     } catch (error) {
-      // console.error("Error adding friend");
-      // console.error(
-      //   "Add Friend Error:",
-      //   error.response?.data?.error || error.message
-      // );
       toast.error(
         error.response?.data?.error ||
           "Failed to add friend. Please try again.",

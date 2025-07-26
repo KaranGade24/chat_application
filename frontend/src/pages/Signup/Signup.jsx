@@ -3,7 +3,7 @@ import styles from "./Signup.module.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -85,6 +85,7 @@ const Signup = () => {
 
   return (
     <div className={styles.signupWrapper}>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className={styles.signupCard}>
         <h2 className={styles.title}>Create Account 🚀</h2>
         <p className={styles.subtitle}>Join the chat and start talking</p>

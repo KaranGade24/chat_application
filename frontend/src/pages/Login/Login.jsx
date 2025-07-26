@@ -3,7 +3,7 @@ import styles from "./Login.module.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 import MessageContext from "../../store/Messages/MessageContext";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const Login = () => {
   const { setUser, setLoading } = useContext(MessageContext); // Assuming you have a context to set the user
@@ -84,37 +84,40 @@ const Login = () => {
   };
 
   return (
-    <div className={styles.loginWrapper}>
-      <div className={styles.loginCard}>
-        <h2 className={styles.title}>Welcome Back 👋</h2>
-        <p className={styles.subtitle}>Sign in to your chat account</p>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <input
-            type="email"
-            placeholder="Email"
-            ref={email}
-            className={styles.input}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            ref={password}
-            className={styles.input}
-            required
-          />
-          <button type="submit" className={styles.button}>
-            Login
-          </button>
-        </form>
-        <p className={styles.footerText}>
-          Don't have an account? <NavLink to="/signup">Create one</NavLink>
-        </p>
-        {/* <p className={styles.footerText}>
+    <>
+      <div className={styles.loginWrapper}>
+        <ToastContainer position="top-right" autoClose={3000} />
+        <div className={styles.loginCard}>
+          <h2 className={styles.title}>Welcome Back 👋</h2>
+          <p className={styles.subtitle}>Sign in to your chat account</p>
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <input
+              type="email"
+              placeholder="Email"
+              ref={email}
+              className={styles.input}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              ref={password}
+              className={styles.input}
+              required
+            />
+            <button type="submit" className={styles.button}>
+              Login
+            </button>
+          </form>
+          <p className={styles.footerText}>
+            Don't have an account? <NavLink to="/signup">Create one</NavLink>
+          </p>
+          {/* <p className={styles.footerText}>
           Forgot password? <a href="#">Reset</a>
         </p> */}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

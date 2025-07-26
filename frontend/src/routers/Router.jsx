@@ -6,6 +6,7 @@ import Login from "../pages/Login/Login";
 import Signup from "../pages/Signup/Signup";
 import ProfilePage from "../pages/Profile/ProfilePage";
 import EmptyStatePage from "../pages/EmptyStatePage/EmptyStatePage";
+import CallVideoPage from "../pages/CallVideoPage/CallVideoPage";
 
 const Router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -18,6 +19,7 @@ const Router = createBrowserRouter([
       { path: "", element: <EmptyStatePage /> },
       { path: "chat", element: <Chat /> },
       { path: "profile", element: <ProfilePage /> },
+      { path: "call-video", element: <CallVideoPage /> },
     ],
   },
 ]);

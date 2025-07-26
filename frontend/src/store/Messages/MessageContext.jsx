@@ -10,6 +10,9 @@ const MessageContext = createContext({
   setUser: () => {},
   setLoading: () => {},
   updateFriendMessages: () => {},
+  messageLoadFriendList: [],
+  setMessageLoadFriendList: () => {},
+  setUsers:()=>{},
 });
 
 export default MessageContext;

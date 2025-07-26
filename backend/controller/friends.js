@@ -1,3 +1,5 @@
+const { socketfuntion } = require("../config/socket");
+const { io } = require("../index");
 const User = require("../model/User");
 
 exports.addFriend = async (req, res) => {
@@ -82,5 +84,38 @@ exports.fetchFriends = async (req, res) => {
   } catch (err) {
     console.error("Error fetching friends:", err.message);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// DELETE /api/user/delete-friend
+exports.deleteFriendForYou = async (req, res) => {
+  try {
+    const { currentUserId, targetUserId } = req.body;
+
+    console.log("user to delete:", { currentUserId, targetUserId });
+
+    if (!currentUserId || !targetUserId) {
+      return res.status(400).json({ error: "Both user IDs are required." });
+    }
+
+    await User.findByIdAndUpdate(
+      currentUserId,
+      { $pull: { friends: targetUserId } },
+      { new: true }
+    ).populate("friends", "name email profilePic isOnline");
+
+    // Get updated user with populated friends
+    const updatedUser = await User.findById(currentUserId).populate(
+      "friends",
+      "name email profilePic isOnline"
+    );
+
+    return res.status(200).json({
+      message: "Friend deleted from your list.",
+      updatedUser,
+    });
+  } catch (error) {
+    console.error("Delete Friend (You) Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };

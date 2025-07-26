@@ -1,3 +1,10 @@
+.loadingMsg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
 .userChat {
   display: flex;
   flex-direction: column;
@@ -10,6 +17,8 @@
   height: 100%;
   overflow-y: auto;
   flex: 1;
+  word-break: break-all;
+  word-wrap: break-word;
 }
 
 /* Header */
@@ -20,6 +29,7 @@
   padding: 12px 16px;
   border-bottom: 1px solid #333;
   color: hsl(231deg 10% 27%);
+  cursor: pointer;
 }
 
 .backArrow {
@@ -121,6 +131,7 @@
   color: hsl(210, 2%, 25%);
   font-size: 14px;
   margin-right: 10px;
+  width: 1px;
 }
 
 .sendBtn {
@@ -191,15 +202,72 @@
 
 .emojiPicker {
   position: absolute;
-  bottom: 50px;
-  right: 60px;
-  z-index: 10;
-  background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  bottom: 60px;
+  right: 10px;
+  z-index: 1000;
+  max-height: 300px;
+  width: 100%;
+  max-width: 320px;
+  overflow-y: auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.typingIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: green; /* Tailwind slate-500 */
+  padding-left: 0.75rem;
+  margin-bottom: 8px;
+  animation: fadeInTyping 0.3s ease-in-out;
+  transition: all 0.3s ease;
+}
+
+.typingIndicator::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: green;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInTyping {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
   .backArrow {
     display: block;
+  }
+  .emojiPicker {
+    width: 95%;
+    right: 2.5%;
+    left: 2.5%;
+    bottom: 70px;
+    max-width: none;
+    max-height: 250px;
   }
 }

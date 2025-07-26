@@ -10,7 +10,6 @@ const Socket = (currentUser) => {
       withCredentials: true,
     });
   }
-
   return socket;
 };
 

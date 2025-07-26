@@ -3,6 +3,7 @@ import styles from "./SideBar.module.css";
 import { FiSettings } from "react-icons/fi";
 import { BsChatDots } from "react-icons/bs";
 import { MdMessage, MdOutlineMessage } from "react-icons/md";
+import { FiPhone } from "react-icons/fi"; // Feather Icon
 import { HiOutlineChatAlt2 } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
@@ -24,8 +25,14 @@ function SideBar() {
         >
           <MdOutlineMessage size={30} />
         </p>
-        <p>
-          <MdMessage size={30} />
+        <p
+          className={isSelected === "call-video" ? styles.isSelected : ""}
+          onClick={() => {
+            setIsSelected("call-video");
+            navigate("call-video");
+          }}
+        >
+          <FiPhone size={22} />
         </p>
         <p>
           <MdMessage size={30} />

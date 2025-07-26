@@ -2,9 +2,14 @@ import React, { useState, useContext, useEffect } from "react";
 import styles from "./ProfilePage.module.css";
 import { FaEnvelope, FaUser, FaLock, FaCamera } from "react-icons/fa";
 import MessageContext from "../../store/Messages/MessageContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import Socket from "../../../config/Socket";
 
 const ProfilePage = () => {
-  const { user, onUpdateProfile } = useContext(MessageContext);
+  const navigate = useNavigate();
+  const { user } = useContext(MessageContext);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -16,6 +21,12 @@ const ProfilePage = () => {
   });
   const [editMode, setEditMode] = useState(false);
   const [showPwdFields, setShowPwdFields] = useState(false);
+  const [socket, setSocket] = useState(null);
+  useEffect(() => {
+    if (!user) return;
+
+    setSocket(Socket(user));
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -44,9 +55,46 @@ const ProfilePage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onUpdateProfile(form);
+    // onUpdateProfile(form);
     setEditMode(false);
     setShowPwdFields(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (confirm("You want to logout")) {
+        await axios.get(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+          withCredentials: true, // IMPORTANT: clears cookie
+        });
+      }
+
+      if (socket) {
+        socket.disconnect();
+      }
+
+      toast.success("logout successful. Redirecting...", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light", // or "dark", "colored"
+        newestOnTop: true,
+        pauseOnFocusLoss: true,
+        rtl: false, // for right-to-left languages
+        icon: true, // or pass a custom icon component
+        role: "alert", // for accessibility
+      });
+      // Redirect to login
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
+    } catch (err) {
+      console.error("Logout failed:", err);
+      alert("Logout failed. Please try again.");
+    }
   };
 
   return (
@@ -133,6 +181,12 @@ const ProfilePage = () => {
               rows="3"
             />
           </div>
+
+          {!editMode && (
+            <button className={styles.logoutBtn} onClick={handleLogout}>
+              Logout
+            </button>
+          )}
 
           {editMode && (
             <>
