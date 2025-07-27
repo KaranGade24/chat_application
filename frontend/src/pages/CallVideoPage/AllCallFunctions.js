@@ -9,22 +9,30 @@ export const makeCallRequest = async (
     setCallee,
     setCallType,
     peerConnectionRef,
+    setRemoteStream, // 🔥 Add this to fix undefined remote stream
   }
 ) => {
   try {
-    console.log("Calling user ID:", receiverId);
+    console.log("📞 Calling user ID:", receiverId);
 
     // 1. Get local media stream
     const localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
-      video: mode === "video-call",
+      video: mode === "video",
     });
-
     // 2. Create peer connection
     const peerConnection = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        {
+          urls: "turn:openrelay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+      ],
     });
 
+    // 3. ICE candidate handling
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         socket.emit("ice-candidate", {
@@ -34,65 +42,82 @@ export const makeCallRequest = async (
       }
     };
 
-    // 3. Add tracks to peer connection
+    // 4. Add local tracks to peer connection (SEND audio/video)
     localStream.getTracks().forEach((track) => {
       peerConnection.addTrack(track, localStream);
     });
 
-    // 4. Create and set local offer
+    // ✅ Correct order
+    peerConnection.ontrack = (event) => {
+      const inbound = new MediaStream();
+      inbound.addTrack(event.track);
+      setRemoteStream((prevStream) => {
+        if (!prevStream) return inbound;
+        prevStream.addTrack(event.track);
+        return prevStream;
+      });
+    };
+
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
 
-    // 5. Emit socket event to receiver
     socket.emit("make-call", {
       receiverId,
-      mode,
       offer,
+      mode,
     });
 
-    // 6. Update context states
+    // 7. Update context state
     setLocalStream(localStream);
     setPeerConnection(peerConnection);
-    peerConnectionRef.current = pc;
+    peerConnectionRef.current = peerConnection;
     setCallee(receiverId);
     setCallType(mode);
     setInCall(true);
 
     return { localStream, peerConnection };
   } catch (error) {
-    console.error("Error making call:", error);
-    alert("Could not start the call. Please check permissions.");
+    console.error("🚨 getUserMedia error:", error.name, error.message);
+    alert("Could not start the call. Please check mic/camera permissions.");
   }
 };
 
 //After accepting call
 
 export const acceptCallRequest = async (
-  { mode, callerId, offer }, // incoming call data
+  { mode, callerId, offer },
   socket,
   {
     setLocalStream,
     setRemoteStream,
     setPeerConnection,
     setInCall,
-    setCaller,
+    setCallee,
     setCallType,
     peerConnectionRef,
-    setIsIncomingCall,
+    setIncomingCall,
+    pendingCandidatesRef,
+    callRef,
   }
 ) => {
   try {
-    console.log("Accepting call from:", callerId);
+    console.log("✅ Accepting call from:", callerId);
 
-    // 1. Get local media stream
+    // 1. FIXED: Use consistent mode check
     const localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
-      video: mode === "video-call",
+      video: mode === "video", //mode === "video", // 🔥 FIXED here
     });
 
-    // 2. Create peer connection
     const peerConnection = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        {
+          urls: "turn:openrelay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+      ],
     });
 
     peerConnection.onicecandidate = (event) => {
@@ -104,21 +129,31 @@ export const acceptCallRequest = async (
       }
     };
 
-    // 3. Add local tracks to peer connection
     localStream.getTracks().forEach((track) => {
       peerConnection.addTrack(track, localStream);
     });
 
-    // 4. Listen for remote stream
-    const remoteStream = new MediaStream();
-    peerConnection.addEventListener("track", (event) => {
-      remoteStream.addTrack(event.track);
-    });
+    peerConnection.ontrack = (event) => {
+      const inbound = new MediaStream();
+      inbound.addTrack(event.track);
+      setRemoteStream((prevStream) => {
+        if (!prevStream) return inbound;
+        prevStream.addTrack(event.track);
+        return prevStream;
+      });
+    };
 
-    // 5. Set remote offer from caller
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
-    // 6. Create and send answer
+    for (const candidate of pendingCandidatesRef.current) {
+      try {
+        await peerConnection.addIceCandidate(candidate);
+      } catch (err) {
+        console.error("Buffered ICE error:", err);
+      }
+    }
+    pendingCandidatesRef.current = [];
+
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
 
@@ -127,17 +162,15 @@ export const acceptCallRequest = async (
       answer,
     });
 
-    // 7. Store everything in state/context
     setLocalStream(localStream);
-    setRemoteStream(remoteStream);
     setPeerConnection(peerConnection);
-    peerConnectionRef.current = pc;
-    setCaller(callerId);
+    peerConnectionRef.current = peerConnection;
+    setCallee(callerId);
     setCallType(mode);
-    setIsIncomingCall(null);
+    callRef.current = "callAccepted";
     setInCall(true);
   } catch (error) {
-    console.error("Error accepting call:", error);
+    console.error("❌ getUserMedia error:", error.name, error.message);
     alert("Could not accept the call. Check your mic/cam permissions.");
   }
 };
@@ -152,11 +185,13 @@ export const endCall = ({
   setPeerConnection,
   setCallee,
   setCallType,
-  setIsIncommingCall,
+  setIncomingCall,
   targetUserId,
+  currentUserId,
   storeSocket: socket,
   setActiveUser,
   setMode,
+  callRef,
 }) => {
   if (localStream) {
     localStream.getTracks().forEach((track) => track.stop());
@@ -166,9 +201,18 @@ export const endCall = ({
   }
 
   // 🔴 Emit event to tell the other user that the call ended
-  console.log("Ending call to", targetUserId);
   if (socket && targetUserId) {
-    socket.emit("call-end", { to: targetUserId });
+    console.log(
+      "Ending call to all funtions",
+      currentUserId,
+      "=>",
+      targetUserId
+    );
+
+    socket.emit("call-end", {
+      to: targetUserId,
+      me: currentUserId,
+    });
   }
 
   setInCall(false);
@@ -176,7 +220,7 @@ export const endCall = ({
   setPeerConnection(null);
   setCallee(null);
   setCallType(null);
-  setIsIncommingCall(null);
+  callRef.current = "callEnded";
   setActiveUser(null);
   setMode(null);
 };

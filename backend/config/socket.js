@@ -177,9 +177,9 @@ exports.socketfuntion = (io) => {
     });
 
     // Listen for 'call-end' event from either caller or receiver
-    socket.on("call-end", ({ to }) => {
+    socket.on("call-end", ({ to, me }) => {
       console.log("call end");
-      listenEndCall(socket, io, to, userSocketMap);
+      listenEndCall(socket, io, to, me, userSocketMap);
     });
     // 📴 Handle disconnect
     socket.on("disconnect", async () => {

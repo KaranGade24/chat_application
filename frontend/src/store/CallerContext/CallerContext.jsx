@@ -15,8 +15,8 @@ const CallerContext = createContext({
   setCallee: () => {},
   callType: null,
   setCallType: () => {},
-  isIncommingCall: null,
-  setIsIncommingCall: () => {},
+  incomingCall: null,
+  setIncomingCall: () => {},
   isCurrectUser: null,
   serIsCurrectUser: () => {},
   storeSocket: null,
@@ -28,6 +28,8 @@ const CallerContext = createContext({
   mode: null,
   setMode: () => {},
   peerConnectionRef: null,
+  pendingCandidatesRef: [],
+  callRef: null,
 });
 
 export default CallerContext;

@@ -14,13 +14,14 @@ import {
 import CallerContext from "./store/CallerContext/CallerContext";
 import Socket from "../config/Socket";
 import AfterAcceptingCall from "./components/AfterAcceptingCall";
+import CallScreenManager from "./components/CallScreenManager";
 
 function App() {
   const { loading, user: currentUser, users } = useContext(MessageContext); // or any global loading logic
 
   const {
-    isIncommingCall,
-    setIsIncommingCall,
+    incomingCall,
+    setIncomingCall,
     serIsCurrectUser,
     localStream,
     peerConnection,
@@ -39,7 +40,8 @@ function App() {
     remoteStream,
     mode,
     peerConnectionRef,
-    setIsIncomingCall,
+    pendingCandidatesRef,
+    callRef,
   } = useContext(CallerContext);
   const navigate = useNavigate();
   useEffect(() => {
@@ -62,20 +64,22 @@ function App() {
       setPeerConnection,
       setCallee,
       setCallType,
-      setIsIncommingCall,
+      setIncomingCall,
       targetUserId,
+      currentUserId: currentUser._id,
       storeSocket,
       setActiveUser,
       setMode,
+      callRef,
     });
   };
 
-  const onAccept = (isIncommingCall) => {
+  const onAccept = (incomingCall) => {
     acceptCallRequest(
       {
-        mode: isIncommingCall.mode,
-        callerId: isIncommingCall.callerId,
-        offer: isIncommingCall.offer,
+        mode: incomingCall.mode,
+        callerId: incomingCall.callerId,
+        offer: incomingCall.offer,
       },
       storeSocket,
       {
@@ -83,23 +87,26 @@ function App() {
         setRemoteStream,
         setPeerConnection,
         setInCall,
-        setCaller,
+        setCallee,
         setCallType,
         peerConnectionRef,
-        setIsIncomingCall,
+        setIncomingCall,
+        pendingCandidatesRef,
+        callRef,
       }
     );
   };
-  console.log("incall from app", inCall);
   useEffect(() => {
     const socket = Socket(currentUser);
 
     if (!socket) return;
 
     socket.on("call-end", ({ from }) => {
-      console.log("Call was ended by:", from);
+      console.log("Call was ended by App.jsx:", from);
     });
   }, []);
+
+  console.log("incomingCall", mode);
 
   return (
     <div className="app">
@@ -114,21 +121,18 @@ function App() {
             <Outlet />
           </div>
 
-          {inCall && (
-            <AfterAcceptingCall
-              mode={mode} // either "call" or "video-call"
-              localStream={localStream}
-              remoteStream={remoteStream}
-              onEnd={onReject} // or use endCall() here
-            />
-          )}
+          {callRef.current === "callAccepted" && <CallScreenManager />}
 
-          {!inCall && isIncommingCall !== null && (
+          {callRef.current === "incomingCall" && (
             <IncomingCallModal
-              caller={users.find((u) => u._id === isIncommingCall.callerId)}
+              caller={
+                users.find((u) => u._id === incomingCall.callerId) || {
+                  name: "Unknown",
+                }
+              }
               onReject={onReject}
               onAccept={() => {
-                onAccept(isIncommingCall);
+                onAccept(incomingCall);
               }}
             />
           )}

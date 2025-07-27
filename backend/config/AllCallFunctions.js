@@ -28,6 +28,8 @@ exports.listenMakeCallSignleAndSendIncommingCallNotification = (
 exports.acceptCall = (io, callerId, answer, userSocketMap) => {
   const callerSocketId = userSocketMap.get(callerId);
   if (callerSocketId) {
+    console.log("call accepted", answer);
+    // to(callerSocketId)
     io.to(callerSocketId).emit("accept-call", { answer });
   }
 };
@@ -43,9 +45,10 @@ exports.iceCandidate = (io, toUserId, candidate, userSocketMap, userId) => {
   }
 };
 
-exports.listenEndCall = (socket, io, toId, userSocketMap) => {
-  toCaller = userSocketMap.get(toId);
+exports.listenEndCall = (socket, io, toId, meId, userSocketMap) => {
+  toReceiver = userSocketMap.get(toId);
+  toCaller = userSocketMap.get(meId);
   console.log(`Ending call. Notify user: ${toId}->${toCaller}`);
   // Emit to the other participant to close the call UI and media
-  io.to(toCaller).emit("call-end", { from: socket.id });
+  io.to(toCaller, toReceiver).emit("call-end", { from: socket.id });
 };

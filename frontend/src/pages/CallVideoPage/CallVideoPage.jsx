@@ -22,6 +22,7 @@ export default function CallVideoPage() {
     mode,
     setMode,
     peerConnectionRef,
+    setRemoteStream,
   } = useContext(CallerContext);
 
   const { user, users: friendList, setUserStatuses } = useMessageContext();
@@ -35,15 +36,13 @@ export default function CallVideoPage() {
 
   const handleAction = async (selectUser, action) => {
     const socket = Socket(user);
+    console.log(socket, "from call videpage");
     if (!socket) return;
 
     if (!friendList || friendList.length === 0) return;
 
-    console.log("socket", socket);
-
     // Call `check-user-online` and handle everything inside the callback
     socket.emit("check-user-online", friendList, (statusList) => {
-      console.log("statusList", statusList);
       setUserStatuses(statusList);
 
       const selectedStatus = statusList.find((f) => f._id === selectUser._id);
@@ -69,20 +68,10 @@ export default function CallVideoPage() {
         setCallee,
         setCallType,
         peerConnectionRef,
+        setRemoteStream,
       }
     );
   };
-  // setActiveUser(selectUser);
-  // setMode(action);
-  // console.log("selectUser", selectUser);
-  // makeCallRequest(mode, selectUser._id, socket, {
-  //   setLocalStream,
-  //   setPeerConnection,
-  //   setInCall,
-  //   setCallee,
-  //   setCallType,
-  //   peerConnectionRef,
-  // });
 
   const hangUp = () => {
     setMode(null);
@@ -91,15 +80,13 @@ export default function CallVideoPage() {
 
   return (
     <div className={styles.container}>
-      {/* on desktop: left list 30%, right content 70% */}
-      {/* on mobile: show list OR content */}
       {(!isMobile || mode === null) && (
-        <UserList mode="video-call" onAction={handleAction} />
+        <UserList mode="video" onAction={handleAction} />
       )}
 
       {mode && activeUser && (
         <div className={isMobile ? styles.mobileFull : styles.content}>
-          {mode === "voice-call" ? (
+          {mode === "voice" ? (
             <CallComponent onHangUp={hangUp} user={activeUser} />
           ) : (
             <VideoCallComponent user={activeUser} />

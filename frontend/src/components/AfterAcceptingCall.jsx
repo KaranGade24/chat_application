@@ -2,18 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./AfterAcceptingCall.module.css";
 import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
 
-const AfterAcceptingCall = ({
-  mode = "video call",
-  localStream,
-  remoteStream,
-  onEnd,
-}) => {
+const AfterAcceptingCall = ({ mode, localStream, remoteStream, onEnd }) => {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
   const [isMicOn, setIsMicOn] = useState(true);
-  const [isCamOn, setIsCamOn] = useState(mode === "video-call");
-  const isVideo = mode === "video-call";
+  const [isCamOn, setIsCamOn] = useState(mode === "video");
+  const isVideo = mode === "video";
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {

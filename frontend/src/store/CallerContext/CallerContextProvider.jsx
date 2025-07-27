@@ -11,77 +11,95 @@ const CallerContextProvider = ({ children }) => {
   const [caller, setCaller] = useState(null);
   const [callee, setCallee] = useState(null);
   const [callType, setCallType] = useState(null);
-  const [isIncommingCall, setIsIncommingCall] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
   const [isCurrectUser, serIsCurrectUser] = useState(null);
   const [storeSocket, setStoreSocket] = useState(null);
   const [targetUserId, SetTargetUserId] = useState(null);
   const [activeUser, setActiveUser] = useState(null);
   const [mode, setMode] = useState(null); // "call" or "video"
-  const socket = Socket(isCurrectUser);
+  // const socket = Socket(isCurrectUser);
   const peerConnectionRef = useRef(null);
+  const pendingCandidatesRef = useRef([]);
+  var socket = Socket(isCurrectUser);
+  const callRef = useRef(null);
 
   useEffect(() => {
-    const socket = Socket(isCurrectUser);
+    const socketInstance = Socket(isCurrectUser);
+    if (!socketInstance) return;
 
-    if (!socket) return;
+    setStoreSocket(socketInstance);
 
-    setStoreSocket(socket);
-
-    socket.on("call-user", async ({ from, offer, mode }) => {
-      setIsIncommingCall({ callerId: from, offer, mode });
+    // 1️⃣ Incoming call handler
+    socketInstance.on("call-user", ({ from, offer, mode }) => {
+      setIncomingCall({ callerId: from, offer, mode });
       SetTargetUserId(from);
+      callRef.current = "incomingCall";
     });
 
-    socket.on("call-end", ({ from }) => {
-      console.log("Call was ended by:", from);
+    // 2️⃣ Call accepted by receiver → set remote description
+    socketInstance.on("accept-call", async ({ answer }) => {
+      if (peerConnectionRef.current) {
+        await peerConnectionRef.current.setRemoteDescription(
+          new RTCSessionDescription(answer)
+        );
+        callRef.current = "callAccepted";
+      } else {
+        console.warn("❌ peerConnectionRef.current is null");
+      }
+    });
 
-      // Stop media and clean up
+    // 3️⃣ ICE Candidate received
+    socketInstance.on("ice-candidate", async ({ candidate }) => {
+      const pc = peerConnectionRef.current;
+      const iceCandidate = new RTCIceCandidate(candidate);
+      if (!pc || !pc.remoteDescription?.type) {
+        pendingCandidatesRef.current.push(iceCandidate);
+      } else {
+        try {
+          await pc.addIceCandidate(iceCandidate);
+        } catch (err) {
+          console.error("❌ ICE candidate error:", err);
+        }
+      }
+    });
+
+    // 4️⃣ Call Ended
+    socketInstance.on("call-end", ({ to, me }) => {
+      const isReceiver = isCurrectUser?._id !== to;
+      if (!isReceiver) return;
+
+      console.log("📞 Call ended by other user", me);
+
       localStream?.getTracks().forEach((track) => track.stop());
       peerConnection?.close();
 
-      // Reset context
+      // Reset
       setLocalStream(null);
       setRemoteStream(null);
       setPeerConnection(null);
+      peerConnectionRef.current = null;
+      pendingCandidatesRef.current = [];
+
       setInCall(false);
-      setIsIncommingCall(null);
+      setIncomingCall(null);
       setCaller(null);
       setCallee(null);
       setCallType(null);
       setMode(null);
       setActiveUser(null);
-      alert("Call was endded");
+      callRef.current = "callEnded";
+
+      alert("📞 Call was ended by the other user.");
     });
 
-    //listen Accept call
-    socket.on("accept-call", async ({ answer }) => {
-      if (peerConnection) {
-        await peerConnection.setRemoteDescription(
-          new RTCSessionDescription(answer)
-        );
-      }
-    });
-
-    // listen ice-candidate
-
-    socket.on("ice-candidate", async ({ fromUserId, candidate }) => {
-      const pc = peerConnectionRef.current;
-      if (pc && candidate) {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (err) {
-          console.error("Failed to add ICE candidate:", err);
-        }
-      }
-    });
-
+    // 🔁 Clean up listeners
     return () => {
-      socket.off("call-user");
-      socket.off("call-end");
-      socket.off("accept-call");
-      socket.off("ice-candidate");
+      socketInstance.off("call-user");
+      socketInstance.off("accept-call");
+      socketInstance.off("ice-candidate");
+      socketInstance.off("call-end");
     };
-  }, [socket]);
+  }, [isCurrectUser]);
 
   return (
     <CallerContext.Provider
@@ -100,8 +118,8 @@ const CallerContextProvider = ({ children }) => {
         setCallee,
         callType,
         setCallType,
-        isIncommingCall,
-        setIsIncommingCall,
+        incomingCall,
+        setIncomingCall,
         isCurrectUser,
         serIsCurrectUser,
         storeSocket,
@@ -113,6 +131,8 @@ const CallerContextProvider = ({ children }) => {
         mode,
         setMode,
         peerConnectionRef,
+        pendingCandidatesRef,
+        callRef,
       }}
     >
       {children}

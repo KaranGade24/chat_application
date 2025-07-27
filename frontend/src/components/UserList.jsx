@@ -76,13 +76,13 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
                   : "offline"}
               </span>
 
-              {mode === "video-call" && (
+              {mode === "video" && (
                 <div className={styles.actions}>
                   <FiPhone
                     className={styles.icon}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onAction?.(user, "voice-call");
+                      onAction?.(user, "voice");
                     }}
                     title="Voice Call"
                   />
@@ -90,7 +90,7 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
                     className={styles.icon}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onAction?.(user, "video-call");
+                      onAction?.(user, "video");
                     }}
                     title="Video Call"
                   />
