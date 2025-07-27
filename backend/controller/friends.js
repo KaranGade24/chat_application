@@ -66,7 +66,7 @@ exports.fetchFriends = async (req, res) => {
 
     const user = await User.findById(userId).populate(
       "friends",
-      "name email avatar isOnline"
+      "name email avatar isOnline lastSeen"
     );
 
     if (!user) {
@@ -100,14 +100,13 @@ exports.deleteFriendForYou = async (req, res) => {
 
     await User.findByIdAndUpdate(
       currentUserId,
-      { $pull: { friends: targetUserId } },
+      { $pull: { friends: targetUserId } }, // this removes a specific friend
       { new: true }
-    ).populate("friends", "name email profilePic isOnline");
-
+    );
     // Get updated user with populated friends
     const updatedUser = await User.findById(currentUserId).populate(
       "friends",
-      "name email profilePic isOnline"
+      "name email avatar isOnline"
     );
 
     return res.status(200).json({

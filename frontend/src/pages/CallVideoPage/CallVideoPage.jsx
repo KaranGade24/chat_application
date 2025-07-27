@@ -1,112 +1,111 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./CallVideoPage.module.css";
 
-export default function CallVideoPage() {
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-  const [isCalling, setIsCalling] = useState(false);
-  const [stream, setStream] = useState(null);
-  const [peerConnection, setPeerConnection] = useState(null);
+import UserList from "../../components/UserList";
+import CallComponent from "../../components/CallComponent";
+import VideoCallComponent from "../../components/VideoCallComponent";
+import Socket from "../../../config/Socket";
+import { useMessageContext } from "../../store/Messages/MessageContextProvider";
+import { makeCallRequest } from "./AllCallFunctions";
+import { useContext } from "react";
+import CallerContext from "../../store/CallerContext/CallerContext";
 
+export default function CallVideoPage() {
+  const {
+    setLocalStream,
+    setPeerConnection,
+    setInCall,
+    setCallee,
+    setCallType,
+    activeUser,
+    setActiveUser,
+    mode,
+    setMode,
+    peerConnectionRef,
+  } = useContext(CallerContext);
+
+  const { user, users: friendList, setUserStatuses } = useMessageContext();
+  // responsive breakpoint hook
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
-    // get local stream once
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((mediaStream) => {
-        setStream(mediaStream);
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = mediaStream;
-        }
-      })
-      .catch((err) => console.error("Error accessing media devices.", err));
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const startCall = async () => {
-    if (!stream) return;
-    setIsCalling(true);
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
+  const handleAction = async (selectUser, action) => {
+    const socket = Socket(user);
+    if (!socket) return;
 
-    // add tracks
-    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+    if (!friendList || friendList.length === 0) return;
 
-    // when remote stream arrives
-    pc.ontrack = (event) => {
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
+    console.log("socket", socket);
+
+    // Call `check-user-online` and handle everything inside the callback
+    socket.emit("check-user-online", friendList, (statusList) => {
+      console.log("statusList", statusList);
+      setUserStatuses(statusList);
+
+      const selectedStatus = statusList.find((f) => f._id === selectUser._id);
+
+      if (!selectedStatus || !selectedStatus.isOnline) {
+        alert("The selected user is currently offline and cannot be called.");
+        return; // 💡 Ensures code below doesn't run
       }
-    };
-
-    // create offer
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-
-    // normally you send offer via signaling server, here we loopback for demo
-    await pc.setRemoteDescription(offer);
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    await pc.setRemoteDescription(answer);
-
-    setPeerConnection(pc);
-  };
-
-  const endCall = () => {
-    if (peerConnection) {
-      peerConnection.close();
-      setPeerConnection(null);
-    }
-    setIsCalling(false);
-    // stop remote video
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = null;
-    }
-  };
-
-  const toggleAudio = () => {
-    if (!stream) return;
-    stream.getAudioTracks().forEach((track) => {
-      track.enabled = !track.enabled;
     });
-  };
+    // 1. Check online…
+    setActiveUser(selectUser);
+    setMode(action);
 
-  const toggleVideo = () => {
-    if (!stream) return;
-    stream.getVideoTracks().forEach((track) => {
-      track.enabled = !track.enabled;
-    });
+    // 2. **Use `action`, not `mode`**, to start the call:
+    await makeCallRequest(
+      action, // ← voice-call or video-call
+      selectUser._id,
+      socket,
+      {
+        setLocalStream,
+        setPeerConnection,
+        setInCall,
+        setCallee,
+        setCallType,
+        peerConnectionRef,
+      }
+    );
+  };
+  // setActiveUser(selectUser);
+  // setMode(action);
+  // console.log("selectUser", selectUser);
+  // makeCallRequest(mode, selectUser._id, socket, {
+  //   setLocalStream,
+  //   setPeerConnection,
+  //   setInCall,
+  //   setCallee,
+  //   setCallType,
+  //   peerConnectionRef,
+  // });
+
+  const hangUp = () => {
+    setMode(null);
+    setActiveUser(null);
   };
 
   return (
     <div className={styles.container}>
-      <div className={styles.videos}>
-        <video
-          ref={localVideoRef}
-          autoPlay
-          muted
-          className={styles.localVideo}
-        />
-        <video ref={remoteVideoRef} autoPlay className={styles.remoteVideo} />
-      </div>
-      <div className={styles.controls}>
-        {!isCalling ? (
-          <button className={styles.callBtn} onClick={startCall}>
-            📞 Start Call
-          </button>
-        ) : (
-          <>
-            <button className={styles.controlBtn} onClick={toggleAudio}>
-              🎙️ Mute/Unmute
-            </button>
-            <button className={styles.controlBtn} onClick={toggleVideo}>
-              🎥 Video On/Off
-            </button>
-            <button className={styles.endBtn} onClick={endCall}>
-              🔴 End Call
-            </button>
-          </>
-        )}
-      </div>
+      {/* on desktop: left list 30%, right content 70% */}
+      {/* on mobile: show list OR content */}
+      {(!isMobile || mode === null) && (
+        <UserList mode="video-call" onAction={handleAction} />
+      )}
+
+      {mode && activeUser && (
+        <div className={isMobile ? styles.mobileFull : styles.content}>
+          {mode === "voice-call" ? (
+            <CallComponent onHangUp={hangUp} user={activeUser} />
+          ) : (
+            <VideoCallComponent user={activeUser} />
+          )}
+        </div>
+      )}
     </div>
   );
 }

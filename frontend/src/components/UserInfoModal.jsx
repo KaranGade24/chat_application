@@ -4,22 +4,27 @@ import axios from "axios";
 import { useContext } from "react";
 import MessageContext from "../store/Messages/MessageContext";
 
-const UserInfoModal = ({ user, onClose }) => {
-  const { setUsers, selectedUser } = useContext(MessageContext);
-
+const UserInfoModal = ({ user, onClose, onBack, selectedUserStatus }) => {
+  const {
+    user: currentUser,
+    setUsers,
+    selectedUser,
+  } = useContext(MessageContext);
   const handleDeleteForYou = async () => {
     // Remove receiver from current user's friend list
     const response = await axios.delete(
       `${import.meta.env.VITE_API_URL}/friends/delete-friend`,
       {
-        data: { currentUserId: user._id, targetUserId: selectedUser._id },
+        data: {
+          currentUserId: currentUser._id,
+          targetUserId: selectedUser._id,
+        },
         withCredentials: true,
       }
     );
     if (response.status === 200) {
-      console.log("response", response.data);
-      setUsers(response.data.updatedUser || []);
-
+      setUsers(response.data.updatedUser.friends);
+      onBack();
       onClose(); // close modal
     }
   };
@@ -48,7 +53,20 @@ const UserInfoModal = ({ user, onClose }) => {
           className={styles.avatar}
         />
         <h2>{user.name}</h2>
-        <p>Status: {user.status}</p>
+        <p>
+          Status:
+          {selectedUserStatus?.isOnline
+            ? "online"
+            : selectedUserStatus?.lastSeen
+            ? `last seen: ${new Date(
+                selectedUserStatus.lastSeen
+              ).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })}`
+            : "offline"}
+        </p>
         <div className={styles.buttonContainer}>
           <button className={styles.deleteOneBtn} onClick={handleDeleteForYou}>
             🗑️ Delete for You

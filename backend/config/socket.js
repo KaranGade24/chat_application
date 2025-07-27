@@ -1,8 +1,25 @@
 const Message = require("../model/Messages");
 const User = require("../model/User");
+const {
+  listenMakeCallSignleAndSendIncommingCallNotification,
+  listenEndCall,
+  acceptCall,
+  iceCandidate,
+} = require("./AllCallFunctions");
 
 exports.socketfuntion = (io) => {
   const userSocketMap = new Map();
+
+  const emitAllUserStatuses = async () => {
+    const users = await User.find({}).select("_id lastSeen");
+    const statuses = users.map((u) => ({
+      _id: u._id.toString(),
+      isOnline: userSocketMap.has(u._id.toString()),
+      lastSeen: u.lastSeen,
+    }));
+
+    io.emit("user-statuses", statuses);
+  };
 
   io.on("connection", async (socket) => {
     const { userId } = socket.handshake.query;
@@ -10,7 +27,8 @@ exports.socketfuntion = (io) => {
 
     if (userId) {
       userSocketMap.set(userId, socket.id);
-      await User.findByIdAndUpdate(userId, { isOnline: true });
+      await User.findByIdAndUpdate(userId, { isOnline: true, lastSeen: null });
+      await emitAllUserStatuses();
     }
 
     // 💬 Receive a new message
@@ -18,27 +36,39 @@ exports.socketfuntion = (io) => {
       try {
         if (!sender || !receiver || !message) return;
 
-        // Step 1: Check if receiver has sender in their friend list
-        const receiverUser = await User.findById(receiver);
+        console.log("sendinmsg....", { sender, receiver, message });
+        // Step 1: Check if receiver is prresent in sender's  friend list
+        const existSenderUser = await User.findById(sender);
         let newUser = null;
+        const existReceiverUser = await User.findById(receiver);
+        if (
+          !existSenderUser.friends.includes(receiver) ||
+          !existReceiverUser.friends.includes(sender)
+        ) {
+          await User.findByIdAndUpdate(sender, {
+            $addToSet: { friends: receiver },
+          });
 
-        if (!receiverUser.friends.includes(sender)) {
           await User.findByIdAndUpdate(receiver, {
             $addToSet: { friends: sender },
           });
 
-          // Get the full sender details to send to receiver
-          newUser = await User.findById(sender).select(
+          newUser = await User.findById(receiver).select(
             "name email profilePic status"
           );
 
-          const senderSocketId = userSocketMap.get(receiver);
-          if (newUser && senderSocketId) {
-            io.to(senderSocketId).emit("add-user", newUser);
+          const receiveSocketId = userSocketMap.get(receiver);
+          if (newUser && receiveSocketId) {
+            console.log(
+              "adding new user 49 socket.js",
+              newUser,
+              receiveSocketId
+            );
+            io.to(receiveSocketId).emit("add-user", newUser);
           }
         }
 
-        // Step 2: Ensure sender has receiver in THEIR friend list
+        // Step 2: Ensure sender is exist or not
         const senderUser = await User.findById(sender);
 
         if (!senderUser.friends.includes(receiver)) {
@@ -56,6 +86,7 @@ exports.socketfuntion = (io) => {
         const receiverSocketId = userSocketMap.get(receiver);
 
         if (receiverSocketId) {
+          console.log("emitting mag");
           io.to(receiverSocketId).emit("receive-message", {
             userId: sender,
             message,
@@ -101,6 +132,55 @@ exports.socketfuntion = (io) => {
       }
     });
 
+    socket.on("check-user-online", async (users, callback) => {
+      try {
+        const results = await Promise.all(
+          users.map(async (u) => {
+            if (userSocketMap.has(u._id)) {
+              return { _id: u._id, isOnline: true };
+            } else {
+              const userData = await User.findById(u._id).select("lastSeen");
+              return {
+                _id: u._id,
+                isOnline: false,
+                lastSeen: userData?.lastSeen || null,
+              };
+            }
+          })
+        );
+
+        callback(results);
+
+        // Optionally emit to all clients if data changed
+        io.emit("user-statuses", results);
+      } catch (err) {
+        console.error("Error checking user online status:", err);
+        callback([]);
+      }
+    });
+
+    //calling setup
+    listenMakeCallSignleAndSendIncommingCallNotification(
+      socket,
+      io,
+      userSocketMap,
+      userId
+    );
+
+    //accept call
+    socket.on("accept-call", ({ callerId, answer }) => {
+      acceptCall(io, callerId, answer, userSocketMap);
+    });
+
+    socket.on("ice-candidate", ({ toUserId, candidate }) => {
+      iceCandidate(io, toUserId, candidate, userSocketMap, userId);
+    });
+
+    // Listen for 'call-end' event from either caller or receiver
+    socket.on("call-end", ({ to }) => {
+      console.log("call end");
+      listenEndCall(socket, io, to, userSocketMap);
+    });
     // 📴 Handle disconnect
     socket.on("disconnect", async () => {
       console.log("❌ Disconnected:", socket.id);
@@ -120,6 +200,7 @@ exports.socketfuntion = (io) => {
           break;
         }
       }
+      await emitAllUserStatuses();
     });
   });
 };

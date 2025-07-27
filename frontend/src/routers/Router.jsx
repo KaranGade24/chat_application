@@ -19,7 +19,7 @@ const Router = createBrowserRouter([
       { path: "", element: <EmptyStatePage /> },
       { path: "chat", element: <Chat /> },
       { path: "profile", element: <ProfilePage /> },
-      { path: "call-video", element: <CallVideoPage /> },
+      { path: "call", element: <CallVideoPage /> },
     ],
   },
 ]);

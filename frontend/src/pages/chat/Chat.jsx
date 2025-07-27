@@ -8,6 +8,8 @@ function Chat() {
   const { selectedUser, setSelectedUser } = useContext(MessageContext);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showChatOnly, setShowChatOnly] = useState(false);
+  const [isUserChatVisible] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleResize = () => {
     const mobile = window.innerWidth < 768;
@@ -23,13 +25,14 @@ function Chat() {
   const handleOnClick = (e, user) => {
     e.preventDefault();
     setSelectedUser(user);
-
+    setShowModal(false);
     setShowChatOnly(true);
   };
 
   const handleBack = () => {
     setShowChatOnly(false);
     setSelectedUser(null);
+    setShowModal(false);
   };
 
   return (
@@ -38,7 +41,15 @@ function Chat() {
         <UserList handleOnClick={handleOnClick} selectedUser={selectedUser} />
       ) : null}
       {!isMobile || showChatOnly ? (
-        <UserChat selectedUser={selectedUser} onBack={handleBack} />
+        <>
+          <UserChat
+            isUserChatVisible={isUserChatVisible}
+            selectedUser={selectedUser}
+            onBack={handleBack}
+            showModal={showModal}
+            setShowModal={setShowModal}
+          />
+        </>
       ) : null}
     </div>
   );

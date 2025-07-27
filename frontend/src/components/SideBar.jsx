@@ -26,10 +26,10 @@ function SideBar() {
           <MdOutlineMessage size={30} />
         </p>
         <p
-          className={isSelected === "call-video" ? styles.isSelected : ""}
+          className={isSelected === "call" ? styles.isSelected : ""}
           onClick={() => {
-            setIsSelected("call-video");
-            navigate("call-video");
+            setIsSelected("call");
+            navigate("call");
           }}
         >
           <FiPhone size={22} />

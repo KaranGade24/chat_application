@@ -8,18 +8,17 @@ import Socket from "../../config/Socket";
 const AddFriendModal = ({ user, onClose }) => {
   const [email, setEmail] = useState("");
   const { setUsers, users, selectedUser } = useMessageContext();
-  console.log("User in AddFriendModal:", user);
   const socket = Socket(user);
 
   useEffect(() => {
     if (!socket) return;
 
     const handleAddUser = (newUser) => {
-      // Ensure newUser is not already in the list
+      console.log("newuser to add:", newUser);
+
       const exists = users.some((u) => u._id === newUser._id);
       if (!exists) {
-        // Optional: check if it's the selected user
-        if (!selectedUser || newUser._id === user._id) {
+        if (newUser._id !== user._id) {
           setUsers((prev) => [...prev, newUser]);
         }
       }
@@ -27,7 +26,6 @@ const AddFriendModal = ({ user, onClose }) => {
 
     socket.on("add-user", handleAddUser);
 
-    // Cleanup
     return () => {
       socket.off("add-user", handleAddUser);
     };
@@ -46,14 +44,12 @@ const AddFriendModal = ({ user, onClose }) => {
         { withCredentials: true }
       );
 
-      // console.log(response.data.friend._id);
       if (response.status === 200) {
       }
       socket.emit("add-user", {
         newUser: response.data.friend,
         userId: response.data.friend._id,
       });
-      // console.log(response.data.message); // "Friend added successfully"
       toast.success("Friend added successfully!", {
         position: "top-right",
         autoClose: 3000,

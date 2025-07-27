@@ -1,16 +1,17 @@
 import React, { useContext, useState } from "react";
 import styles from "./UserList.module.css";
-import MessageContext from "../store/Messages/MessageContext";
-import { useMessageContext } from "../store/Messages/MessageContextProvider";
+import { FiPhone, FiVideo } from "react-icons/fi";
+import MessageContextProvider, {
+  useMessageContext,
+} from "../store/Messages/MessageContextProvider";
 import AddFriendModal from "./AddFriendModal";
-import defaultAvatar from "../assets/defaultAvatar.png"; // Assuming you have a default avatar image
+import defaultAvatar from "../assets/defaultAvatar.png";
+import MessageContext from "../store/Messages/MessageContext";
 
-function UserList({ handleOnClick, selectedUser }) {
-  // const { users } = useContext(MessageContext);
+function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
   const { users, user: currentUser } = useMessageContext();
-  console.log("Current User:", currentUser);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log(users);
+  const { userStatuses } = useContext(MessageContext);
 
   const handleAddClick = () => {
     setIsModalOpen(true);
@@ -21,26 +22,28 @@ function UserList({ handleOnClick, selectedUser }) {
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <h2 className={styles.title}>Users</h2>
         <button
-          onClick={() => handleAddClick()}
+          onClick={handleAddClick}
           className={styles.addBtn}
           title="Add Friend"
         >
           ➕
         </button>
       </div>
+
       {isModalOpen && (
         <AddFriendModal
           user={currentUser}
           onClose={() => setIsModalOpen(false)}
         />
       )}
+
       <ul className={styles.userItems}>
         {users.map((user, index) => (
           <li
-            onClick={(e) => {
-              handleOnClick(e, user);
-            }}
             key={index}
+            onClick={(e) => {
+              if (mode === "chat") handleOnClick?.(e, user);
+            }}
             className={styles.userItem}
             style={{
               backgroundColor:
@@ -56,10 +59,43 @@ function UserList({ handleOnClick, selectedUser }) {
             />
             <div className={styles.userInfo}>
               <p className={styles.userName}>{user.name}</p>
-              {/* <p className={styles.userEmail}>{user.email}</p> */}
-              <span className={`${styles.status} ${styles[user.status]}`}>
-                {user.status}
+              <span
+                style={{ color: "black" }}
+                className={`${styles.status} ${styles[user.status]}`}
+              >
+                {userStatuses.find((u) => u._id === user._id)?.isOnline
+                  ? "online"
+                  : userStatuses.find((u) => u._id === user._id)?.lastSeen
+                  ? `last seen: ${new Date(
+                      userStatuses.find((u) => u._id === user._id).lastSeen
+                    ).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}`
+                  : "offline"}
               </span>
+
+              {mode === "video-call" && (
+                <div className={styles.actions}>
+                  <FiPhone
+                    className={styles.icon}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAction?.(user, "voice-call");
+                    }}
+                    title="Voice Call"
+                  />
+                  <FiVideo
+                    className={styles.icon}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAction?.(user, "video-call");
+                    }}
+                    title="Video Call"
+                  />
+                </div>
+              )}
             </div>
           </li>
         ))}

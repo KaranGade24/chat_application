@@ -1,5 +1,5 @@
 // src/components/UserChat/UserChat.jsx
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import styles from "./UserChat.module.css";
 import EmojiPicker from "emoji-picker-react";
 import EmptyChatPlaceholder from "./EmptyChatPlaceholder";
@@ -10,7 +10,12 @@ import { useMessageContext } from "../store/Messages/MessageContextProvider";
 import { ClipLoader } from "react-spinners";
 import UserInfoModal from "./UserInfoModal";
 
-export default function UserChat({ selectedUser, onBack }) {
+export default function UserChat({
+  selectedUser,
+  onBack,
+  showModal,
+  setShowModal,
+}) {
   const {
     user,
     updateFriendMessages,
@@ -18,13 +23,15 @@ export default function UserChat({ selectedUser, onBack }) {
     messageLoadFriendList,
     users,
     setUsers,
+    setUserStatuses,
   } = useMessageContext();
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [userMessages, setUserMessages] = useState([]);
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [selectedUserStatus, setSelectedUserStatus] = useState(null);
+  const typingTimeoutRef = useRef(null);
 
   // Initialize socket once per user
   const socket = useMemo(() => {
@@ -32,24 +39,73 @@ export default function UserChat({ selectedUser, onBack }) {
     return Socket(user);
   }, [user]);
 
+  // listen is online or lastSeen
+
+  useEffect(() => {
+    // Listen to real-time broadcast of all user statuses from server
+    socket.on("user-statuses", (updatedStatuses) => {
+      setUserStatuses(updatedStatuses);
+
+      const current = updatedStatuses.find((u) => u._id === selectedUser?._id);
+      if (current) {
+        setSelectedUserStatus(current);
+      }
+    });
+
+    return () => {
+      socket.off("user-statuses");
+    };
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (!users || users.length === 0) return;
+
+    // Trigger a status check manually (on mount or user change)
+    socket.emit("check-user-online", users, (statusList) => {
+      setUserStatuses(statusList);
+
+      const current = statusList.find((u) => u._id === selectedUser?._id);
+      if (current) {
+        setSelectedUserStatus(current);
+      }
+    });
+  }, [users, selectedUser]);
+
+  //is typing...
+
   useEffect(() => {
     if (!socket || !selectedUser) return;
 
-    if (input.trim() === "") return;
+    if (input.trim() === "") {
+      socket.emit("isTyping", {
+        isTyping: false,
+        receiverId: selectedUser._id,
+      });
+      return;
+    }
 
     socket.emit("isTyping", {
       isTyping: true,
       receiverId: selectedUser._id,
     });
 
-    const timeout = setTimeout(() => {
+    // Clear existing timeout if user is still typing
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
       socket.emit("isTyping", {
         isTyping: false,
         receiverId: selectedUser._id,
       });
     }, 2000);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
   }, [input]);
 
   useEffect(() => {
@@ -57,23 +113,14 @@ export default function UserChat({ selectedUser, onBack }) {
       return;
     }
 
-    console.log({ socket, selectedUser, user });
     const handleTyping = ({ isTyping, senderId }) => {
-      console.log("📩 Typing event received:", {
-        isTyping,
-        senderId,
-        userId: user._id,
-      });
-
       // Show typing only if the selectedUser (friend) is the one typing
       if (user._id === senderId) {
-        console.log("istyping.........");
         setIsTyping(isTyping);
       }
     };
 
     socket.on("isTyping", handleTyping);
-    console.log("selected user:", selectedUser);
 
     return () => {
       socket.off("isTyping", handleTyping); // cleanup
@@ -186,7 +233,13 @@ export default function UserChat({ selectedUser, onBack }) {
     <div className={styles.userChat}>
       {selectedUser ? (
         <>
-          <div className={styles.header} onClick={handleHeaderClick}>
+          <div
+            className={styles.header}
+            onClick={(e) => {
+              e.preventDefault();
+              handleHeaderClick();
+            }}
+          >
             {onBack && (
               <button
                 className={styles.backBtn}
@@ -206,7 +259,18 @@ export default function UserChat({ selectedUser, onBack }) {
             <div className={styles.userInfo}>
               <h3>{selectedUser.name}</h3>
               <span className={styles.status}>
-                {selectedUser.isOnline ? "online" : "last seen: todo"}
+                {selectedUserStatus?.isOnline
+                  ? "online"
+                  : selectedUserStatus?.lastSeen
+                  ? `last seen: ${new Date(
+                      selectedUserStatus.lastSeen
+                    ).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}`
+                  : "offline"}
+                `
               </span>
               {isTyping && (
                 <div className={styles.typingIndicator}>Typing...</div>
@@ -216,8 +280,13 @@ export default function UserChat({ selectedUser, onBack }) {
           {/* by clicking  on the header  selected user info model is visible */}
           {showModal && (
             <UserInfoModal
+              selectedUserStatus={selectedUserStatus}
               user={selectedUser}
-              onClose={() => setShowModal(false)}
+              onBack={onBack}
+              onClose={(e) => {
+                e.preventDefault();
+                setShowModal(false);
+              }}
             />
           )}
 
