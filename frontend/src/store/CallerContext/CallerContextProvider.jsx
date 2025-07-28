@@ -14,14 +14,20 @@ const CallerContextProvider = ({ children }) => {
   const [incomingCall, setIncomingCall] = useState(null);
   const [isCurrectUser, serIsCurrectUser] = useState(null);
   const [storeSocket, setStoreSocket] = useState(null);
-  const [targetUserId, SetTargetUserId] = useState(null);
+  const [targetUserId, setTargetUserId] = useState(null);
   const [activeUser, setActiveUser] = useState(null);
-  const [mode, setMode] = useState(null); // "call" or "video"
+  const [mode, setMode] = useState(null); // "voice" or "video"
   // const socket = Socket(isCurrectUser);
   const peerConnectionRef = useRef(null);
   const pendingCandidatesRef = useRef([]);
   var socket = Socket(isCurrectUser);
   const callRef = useRef(null);
+
+  useEffect(() => {
+    const sock = Socket(isCurrectUser);
+    setStoreSocket(sock);
+    // return () => sock.disconnect();
+  }, [isCurrectUser]);
 
   useEffect(() => {
     const socketInstance = Socket(isCurrectUser);
@@ -32,7 +38,7 @@ const CallerContextProvider = ({ children }) => {
     // 1️⃣ Incoming call handler
     socketInstance.on("call-user", ({ from, offer, mode }) => {
       setIncomingCall({ callerId: from, offer, mode });
-      SetTargetUserId(from);
+      setTargetUserId(from);
       callRef.current = "incomingCall";
     });
 
@@ -81,7 +87,7 @@ const CallerContextProvider = ({ children }) => {
       pendingCandidatesRef.current = [];
 
       setInCall(false);
-      setIncomingCall(null);
+      // setIncomingCall(null);
       setCaller(null);
       setCallee(null);
       setCallType(null);
@@ -125,7 +131,7 @@ const CallerContextProvider = ({ children }) => {
         storeSocket,
         setStoreSocket,
         targetUserId,
-        SetTargetUserId,
+        setTargetUserId,
         activeUser,
         setActiveUser,
         mode,

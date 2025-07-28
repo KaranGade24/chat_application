@@ -160,12 +160,17 @@ exports.socketfuntion = (io) => {
     });
 
     //calling setup
-    listenMakeCallSignleAndSendIncommingCallNotification(
-      socket,
-      io,
-      userSocketMap,
-      userId
-    );
+    socket.on("make-call", ({ receiverId, offer, mode }) => {
+      listenMakeCallSignleAndSendIncommingCallNotification(
+        receiverId,
+        offer,
+        mode,
+        socket,
+        io,
+        userSocketMap,
+        userId
+      );
+    });
 
     //accept call
     socket.on("accept-call", ({ callerId, answer }) => {

@@ -13,7 +13,10 @@ export const makeCallRequest = async (
   }
 ) => {
   try {
-    console.log("📞 Calling user ID:", receiverId);
+    console.log("📞 Calling user ID:", receiverId, "mode--->", mode, {
+      audio: true,
+      video: mode === "video",
+    });
 
     // 1. Get local media stream
     const localStream = await navigator.mediaDevices.getUserMedia({
@@ -43,18 +46,27 @@ export const makeCallRequest = async (
     };
 
     // 4. Add local tracks to peer connection (SEND audio/video)
+
     localStream.getTracks().forEach((track) => {
       peerConnection.addTrack(track, localStream);
     });
 
-    // ✅ Correct order
+    // peerConnection.ontrack = (event) => {
+    //   const inbound = new MediaStream();
+    //   inbound.addTrack(event.track);
+
+    //   setRemoteStream((prevStream) => {
+    //     if (!prevStream) return inbound;
+    //     prevStream.addTrack(event.track);
+    //     return prevStream;
+    //   });
+    // };
+
     peerConnection.ontrack = (event) => {
-      const inbound = new MediaStream();
-      inbound.addTrack(event.track);
       setRemoteStream((prevStream) => {
-        if (!prevStream) return inbound;
-        prevStream.addTrack(event.track);
-        return prevStream;
+        const stream = prevStream || new MediaStream();
+        stream.addTrack(event.track);
+        return stream;
       });
     };
 
@@ -130,29 +142,36 @@ export const acceptCallRequest = async (
     };
 
     localStream.getTracks().forEach((track) => {
-      peerConnection.addTrack(track, localStream);
+      const alreadySent = peerConnection
+        .getSenders()
+        .some((sender) => sender.track === track);
+      if (!alreadySent) {
+        peerConnection.addTrack(track, localStream);
+      }
     });
 
     peerConnection.ontrack = (event) => {
-      const inbound = new MediaStream();
-      inbound.addTrack(event.track);
       setRemoteStream((prevStream) => {
-        if (!prevStream) return inbound;
-        prevStream.addTrack(event.track);
-        return prevStream;
+        const stream = prevStream || new MediaStream();
+        stream.addTrack(event.track);
+        return stream;
       });
     };
 
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    // await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
-    for (const candidate of pendingCandidatesRef.current) {
+    await peerConnection.setRemoteDescription(offer);
+
+    const pending = pendingCandidatesRef.current;
+    pendingCandidatesRef.current = [];
+    for (const cand of pending) {
       try {
-        await peerConnection.addIceCandidate(candidate);
-      } catch (err) {
-        console.error("Buffered ICE error:", err);
+        await peerConnection.addIceCandidate(cand);
+      } catch (e) {
+        console.error("ICE error", e);
+        pendingCandidatesRef.current.push(cand);
       }
     }
-    pendingCandidatesRef.current = [];
 
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);

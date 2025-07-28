@@ -15,9 +15,6 @@ export default function CallComponent({ onAccept, user, onHangUp }) {
         <button className={styles.hangUp} onClick={onHangUp}>
           Hang Up
         </button>
-        <button className={styles.accept} onClick={onAccept}>
-          Accept Call
-        </button>
       </div>
     </div>
   );

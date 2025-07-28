@@ -14,7 +14,6 @@ import {
 import CallerContext from "./store/CallerContext/CallerContext";
 import Socket from "../config/Socket";
 import AfterAcceptingCall from "./components/AfterAcceptingCall";
-import CallScreenManager from "./components/CallScreenManager";
 
 function App() {
   const { loading, user: currentUser, users } = useContext(MessageContext); // or any global loading logic
@@ -120,8 +119,18 @@ function App() {
             <Header />
             <Outlet />
           </div>
+          {/*           
+          {callRef.current === "callAccepted" && <CallScreenManager />} */}
 
-          {callRef.current === "callAccepted" && <CallScreenManager />}
+          {callRef.current === "callAccepted" && (
+            <AfterAcceptingCall
+              localStream={localStream}
+              mode={mode}
+              onEnd={onReject}
+              remoteStream={remoteStream}
+              user={users.find((u) => u._id == incomingCall?.callerId) || "a"}
+            />
+          )}
 
           {callRef.current === "incomingCall" && (
             <IncomingCallModal

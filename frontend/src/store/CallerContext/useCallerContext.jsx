@@ -23,7 +23,7 @@ const CallerContext = createContext({
   storeSocket: null,
   setStoreSocket: () => {},
   targetUserId: null,
-  SetTargetUserId: () => {},
+  setTargetUserId: () => {},
 });
 
 export default CallerContext;

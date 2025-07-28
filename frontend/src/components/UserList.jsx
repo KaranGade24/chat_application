@@ -6,12 +6,12 @@ import MessageContextProvider, {
 } from "../store/Messages/MessageContextProvider";
 import AddFriendModal from "./AddFriendModal";
 import defaultAvatar from "../assets/defaultAvatar.png";
-import MessageContext from "../store/Messages/MessageContext";
+import CallerContext from "../store/CallerContext/CallerContext";
 
 function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
-  const { users, user: currentUser } = useMessageContext();
+  const { users, user: currentUser, userStatuses } = useMessageContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { userStatuses } = useContext(MessageContext);
+  const { callRef } = useContext(CallerContext);
 
   const handleAddClick = () => {
     setIsModalOpen(true);
@@ -76,12 +76,13 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
                   : "offline"}
               </span>
 
-              {mode === "video" && (
+              {mode === "call" && (
                 <div className={styles.actions}>
                   <FiPhone
                     className={styles.icon}
                     onClick={(e) => {
                       e.stopPropagation();
+                      callRef.current = "callRequest";
                       onAction?.(user, "voice");
                     }}
                     title="Voice Call"
@@ -90,6 +91,7 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
                     className={styles.icon}
                     onClick={(e) => {
                       e.stopPropagation();
+                      callRef.current = "callRequest";
                       onAction?.(user, "video");
                     }}
                     title="Video Call"

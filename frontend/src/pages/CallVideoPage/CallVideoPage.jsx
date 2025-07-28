@@ -23,6 +23,7 @@ export default function CallVideoPage() {
     setMode,
     peerConnectionRef,
     setRemoteStream,
+    callRef,
   } = useContext(CallerContext);
 
   const { user, users: friendList, setUserStatuses } = useMessageContext();
@@ -81,15 +82,15 @@ export default function CallVideoPage() {
   return (
     <div className={styles.container}>
       {(!isMobile || mode === null) && (
-        <UserList mode="video" onAction={handleAction} />
+        <UserList mode="call" onAction={handleAction} />
       )}
 
-      {mode && activeUser && (
+      {callRef.current === "callRequest" && (
         <div className={isMobile ? styles.mobileFull : styles.content}>
           {mode === "voice" ? (
             <CallComponent onHangUp={hangUp} user={activeUser} />
           ) : (
-            <VideoCallComponent user={activeUser} />
+            <VideoCallComponent onHangUp={hangUp} user={activeUser} />
           )}
         </div>
       )}

@@ -22,7 +22,7 @@ const CallerContext = createContext({
   storeSocket: null,
   setStoreSocket: () => {},
   targetUserId: null,
-  SetTargetUserId: () => {},
+  setTargetUserId: () => {},
   activeUser: null,
   setActiveUser: () => {},
   mode: null,
