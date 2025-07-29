@@ -14,7 +14,7 @@ const AddFriendModal = ({ user, onClose }) => {
     if (!socket) return;
 
     const handleAddUser = (newUser) => {
-      console.log("newuser to add:", newUser);
+      // console.log("newuser to add:", newUser);
 
       const exists = users.some((u) => u._id === newUser._id);
       if (!exists) {

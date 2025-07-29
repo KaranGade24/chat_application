@@ -100,12 +100,11 @@ function App() {
 
     if (!socket) return;
 
-    socket.on("call-end", ({ from }) => {
-      console.log("Call was ended by App.jsx:", from);
-    });
+    socket.on("call-end", ({ from }) => {});
   }, []);
 
-  console.log("incomingCall", mode);
+  // console.log("incomingCall", mode);
+  console.log("callRef.current", callRef.current);
 
   return (
     <div className="app">
@@ -119,8 +118,6 @@ function App() {
             <Header />
             <Outlet />
           </div>
-          {/*           
-          {callRef.current === "callAccepted" && <CallScreenManager />} */}
 
           {callRef.current === "callAccepted" && (
             <AfterAcceptingCall
@@ -131,7 +128,6 @@ function App() {
               user={users.find((u) => u._id == incomingCall?.callerId) || "a"}
             />
           )}
-
           {callRef.current === "incomingCall" && (
             <IncomingCallModal
               caller={

@@ -221,12 +221,12 @@ export const endCall = ({
 
   // 🔴 Emit event to tell the other user that the call ended
   if (socket && targetUserId) {
-    console.log(
-      "Ending call to all funtions",
-      currentUserId,
-      "=>",
-      targetUserId
-    );
+    // console.log(
+    //   "Ending call to all funtions",
+    //   currentUserId,
+    //   "=>",
+    //   targetUserId
+    // );
 
     socket.emit("call-end", {
       to: targetUserId,

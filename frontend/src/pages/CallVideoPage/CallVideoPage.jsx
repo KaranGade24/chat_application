@@ -6,7 +6,7 @@ import CallComponent from "../../components/CallComponent";
 import VideoCallComponent from "../../components/VideoCallComponent";
 import Socket from "../../../config/Socket";
 import { useMessageContext } from "../../store/Messages/MessageContextProvider";
-import { makeCallRequest } from "./AllCallFunctions";
+import { endCall, makeCallRequest } from "./AllCallFunctions";
 import { useContext } from "react";
 import CallerContext from "../../store/CallerContext/CallerContext";
 
@@ -24,6 +24,10 @@ export default function CallVideoPage() {
     peerConnectionRef,
     setRemoteStream,
     callRef,
+    localStream,
+    peerConnection,
+    setIncomingCall,
+    storeSocket,
   } = useContext(CallerContext);
 
   const { user, users: friendList, setUserStatuses } = useMessageContext();
@@ -43,46 +47,63 @@ export default function CallVideoPage() {
     if (!friendList || friendList.length === 0) return;
 
     // Call `check-user-online` and handle everything inside the callback
-    socket.emit("check-user-online", friendList, (statusList) => {
+    socket.emit("check-user-online", friendList, async (statusList) => {
       setUserStatuses(statusList);
-
       const selectedStatus = statusList.find((f) => f._id === selectUser._id);
-
       if (!selectedStatus || !selectedStatus.isOnline) {
         alert("The selected user is currently offline and cannot be called.");
-        return; // 💡 Ensures code below doesn't run
+        return;
       }
-    });
-    // 1. Check online…
-    setActiveUser(selectUser);
-    setMode(action);
 
-    // 2. **Use `action`, not `mode`**, to start the call:
-    await makeCallRequest(
-      action, // ← voice-call or video-call
-      selectUser._id,
-      socket,
-      {
-        setLocalStream,
-        setPeerConnection,
-        setInCall,
-        setCallee,
-        setCallType,
-        peerConnectionRef,
-        setRemoteStream,
-      }
-    );
+      console.log("selectUser", selectUser, "action", action);
+      setActiveUser(selectUser);
+      setMode(action);
+
+      // 2. **Use `action`, not `mode`**, to start the call:
+      await makeCallRequest(
+        action, // ← voice-call or video-call
+        selectUser._id,
+        socket,
+        {
+          setLocalStream,
+          setPeerConnection,
+          setInCall,
+          setCallee,
+          setCallType,
+          peerConnectionRef,
+          setRemoteStream,
+        }
+      );
+    });
   };
 
   const hangUp = () => {
+    const targetUserId = activeUser._id;
+    const currentUserId = user._id;
     setMode(null);
     setActiveUser(null);
+    endCall({
+      localStream,
+      peerConnection,
+      setInCall,
+      setLocalStream,
+      setPeerConnection,
+      setCallee,
+      setCallType,
+      setIncomingCall,
+      targetUserId,
+      currentUserId,
+      storeSocket,
+      setActiveUser,
+      setMode,
+      callRef,
+    });
   };
 
   return (
     <div className={styles.container}>
       {(!isMobile || mode === null) && (
-        <UserList mode="call" onAction={handleAction} />
+        <UserList mode={"call"} onAction={handleAction} />
       )}
 
       {callRef.current === "callRequest" && (

@@ -40,6 +40,8 @@ const CallerContextProvider = ({ children }) => {
       setIncomingCall({ callerId: from, offer, mode });
       setTargetUserId(from);
       callRef.current = "incomingCall";
+      setMode(mode);
+      setIncomingCall({ callerId: from, offer, mode });
     });
 
     // 2️⃣ Call accepted by receiver → set remote description
@@ -49,6 +51,7 @@ const CallerContextProvider = ({ children }) => {
           new RTCSessionDescription(answer)
         );
         callRef.current = "callAccepted";
+        // setMode()
       } else {
         console.warn("❌ peerConnectionRef.current is null");
       }
@@ -74,7 +77,7 @@ const CallerContextProvider = ({ children }) => {
       const isReceiver = isCurrectUser?._id !== to;
       if (!isReceiver) return;
 
-      console.log("📞 Call ended by other user", me);
+      // console.log("📞 Call ended by other user", me);
 
       localStream?.getTracks().forEach((track) => track.stop());
       peerConnection?.close();
@@ -94,8 +97,7 @@ const CallerContextProvider = ({ children }) => {
       setMode(null);
       setActiveUser(null);
       callRef.current = "callEnded";
-
-      alert("📞 Call was ended by the other user.");
+      alert("📞 Call was ended.");
     });
 
     // 🔁 Clean up listeners

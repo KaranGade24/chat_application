@@ -173,7 +173,7 @@ exports.socketfuntion = (io) => {
     });
 
     //accept call
-    socket.on("accept-call", ({ callerId, answer }) => {
+    socket.on("accept-call", ({ callerId, answer, mode }) => {
       acceptCall(io, callerId, answer, userSocketMap);
     });
 

@@ -24,6 +24,12 @@ const AfterAcceptingCall = ({
   const audioRef = useRef(null);
   const isVideo = mode === "video";
 
+  console.log("mode", mode, "isVide", isVideo, "iscam", isCamOn);
+
+  useEffect(() => {
+    setIsCamOn(mode === "video");
+  }, [mode]);
+
   // 🕒 Call Timer
   useEffect(() => {
     const interval = setInterval(() => {
@@ -34,7 +40,7 @@ const AfterAcceptingCall = ({
 
   // 🎥 Stream Binding
   useEffect(() => {
-    if (isVideo) {
+    if (isCamOn) {
       if (localVideoRef.current && localStream) {
         localVideoRef.current.srcObject = localStream;
       }
