@@ -75,17 +75,20 @@ exports.socketfuntion = (io) => {
           return; // do not send message if not mutual
         }
 
-        // Step 3: Create and save message
-        const newMessage = await Message.create({
-          sender,
-          receiver,
-          message,
-        });
+        // Step 3: Create and save message if message only consists text msg not files
+        if (!message.isFile) {
+          const newMessage = await Message.create({
+            sender,
+            receiver,
+            message: message.text,
+          });
+        }
 
         // Step 4: Emit message to receiver (if online)
         const receiverSocketId = userSocketMap.get(receiver);
 
         if (receiverSocketId) {
+          console.log({ message });
           console.log("emitting mag");
           io.to(receiverSocketId).emit("receive-message", {
             userId: sender,
@@ -125,6 +128,7 @@ exports.socketfuntion = (io) => {
       const userSocketId = userSocketMap.get(userId);
 
       if (userSocketId) {
+        console.log({ newUser, userSocketId, userId });
         // Emit "add-user" event only to the specific user
         io.to(userSocketId).emit("add-user", newUser); // send newUser directly
       } else {

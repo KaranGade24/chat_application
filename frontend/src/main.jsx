@@ -8,12 +8,12 @@ import CallerContextProvider from "./store/CallerContext/CallerContextProvider.j
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <CallerContextProvider>
-      <MessageContextProvider>
+    <MessageContextProvider>
+      <CallerContextProvider>
         <RouterProvider router={Router}>
           <App />
         </RouterProvider>
-      </MessageContextProvider>
-    </CallerContextProvider>
+      </CallerContextProvider>
+    </MessageContextProvider>
   </StrictMode>
 );

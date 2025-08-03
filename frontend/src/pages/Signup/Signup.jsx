@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styles from "./Signup.module.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import MessageContext from "../../store/Messages/MessageContext";
+import { FaSpinner } from "react-icons/fa";
 
 const Signup = () => {
+  const { setLoading, loading } = useContext(MessageContext);
   const navigate = useNavigate();
   const name = useRef("");
   const email = useRef("");
@@ -14,6 +17,7 @@ const Signup = () => {
   const onSignup = async (user) => {
     try {
       // Make a POST request to the backend for registration
+      setLoading(true);
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/auth/register`,
         {
@@ -61,6 +65,8 @@ const Signup = () => {
         role: "alert", // for accessibility
       });
       return;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,8 +119,13 @@ const Signup = () => {
             minLength={6}
             ref={password}
           />
-          <button type="submit" className={styles.button}>
-            Sign Up
+
+          <button disabled={loading} type="submit" className={styles.button}>
+            {loading ? (
+              <FaSpinner className={loading ? styles.spinner : ""} />
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </form>
         <p className={styles.footerText}>

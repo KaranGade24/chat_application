@@ -23,18 +23,25 @@ const messageSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["text", "image", "video", "file", "audio"],
+      enum: ["text", "image", "video", "file", "audio", "pdf", "other"],
       default: "text",
     },
     attachments: [
       {
-        url: String,
-        filename: String,
+        url: { type: String },
+        filename: { type: String },
+        type: { type: String },
+        size: { type: String },
+        cloudinary_id: { type: String },
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date },
       },
     ],
+
     seen: {
-      type: Boolean,
-      default: false,
+      type: String,
+      enum: ["delivered", "not-delivered", "not-seen", "seen"],
+      default: "not-delivered",
     },
   },
   { timestamps: true }

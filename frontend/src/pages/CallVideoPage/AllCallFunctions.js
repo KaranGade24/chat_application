@@ -13,11 +13,6 @@ export const makeCallRequest = async (
   }
 ) => {
   try {
-    console.log("📞 Calling user ID:", receiverId, "mode--->", mode, {
-      audio: true,
-      video: mode === "video",
-    });
-
     // 1. Get local media stream
     const localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -51,24 +46,24 @@ export const makeCallRequest = async (
       peerConnection.addTrack(track, localStream);
     });
 
-    // peerConnection.ontrack = (event) => {
-    //   const inbound = new MediaStream();
-    //   inbound.addTrack(event.track);
-
-    //   setRemoteStream((prevStream) => {
-    //     if (!prevStream) return inbound;
-    //     prevStream.addTrack(event.track);
-    //     return prevStream;
-    //   });
-    // };
-
     peerConnection.ontrack = (event) => {
+      const inbound = new MediaStream();
+      inbound.addTrack(event.track);
+
       setRemoteStream((prevStream) => {
-        const stream = prevStream || new MediaStream();
-        stream.addTrack(event.track);
-        return stream;
+        if (!prevStream) return inbound;
+        prevStream.addTrack(event.track);
+        return prevStream;
       });
     };
+
+    // peerConnection.ontrack = (event) => {
+    //   setRemoteStream((prevStream) => {
+    //     const stream = prevStream || new MediaStream();
+    //     stream.addTrack(event.track);
+    //     return stream;
+    //   });
+    // };
 
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
@@ -113,8 +108,6 @@ export const acceptCallRequest = async (
   }
 ) => {
   try {
-    console.log("✅ Accepting call from:", callerId);
-
     // 1. FIXED: Use consistent mode check
     const localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -221,18 +214,25 @@ export const endCall = ({
 
   // 🔴 Emit event to tell the other user that the call ended
   if (socket && targetUserId) {
-    // console.log(
-    //   "Ending call to all funtions",
-    //   currentUserId,
-    //   "=>",
-    //   targetUserId
-    // );
-
     socket.emit("call-end", {
       to: targetUserId,
       me: currentUserId,
     });
   }
+
+  localStream?.getTracks().forEach((track) => track.stop());
+  peerConnection?.close();
+
+  (async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: false,
+      });
+    } catch (err) {
+      console.error("Error accessing media:", err);
+    }
+  })();
 
   setInCall(false);
   setLocalStream(null);

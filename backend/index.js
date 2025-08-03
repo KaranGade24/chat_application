@@ -8,6 +8,7 @@ const { authenticate } = require("./authentication/authentication");
 const { Server } = require("socket.io");
 const http = require("http");
 const { socketfuntion } = require("./config/socket");
+const { cloudinaryConnection } = require("./config/cloudinaryConnection");
 
 const app = express();
 app.use(
@@ -36,6 +37,7 @@ socketfuntion(io);
 
 //connections
 connectDB();
+cloudinaryConnection();
 
 //routes
 
@@ -55,8 +57,19 @@ app.use("/friends", authenticate, fetchFriendsRouter);
 const messageRouter = require("./router/message");
 app.use("/messages", authenticate, messageRouter);
 
+//chat files
+const chatFilesRouter = require("./router/chatFiles");
+const User = require("./model/User");
+app.use("/chatfiles", authenticate, chatFilesRouter);
+
+//profile
+const profileRouter = require("./router/User");
+app.use("/profile", authenticate, profileRouter);
+
 const port = 8080;
 
-server.listen(port, () => {
+server.listen(port, async () => {
+  const user = await User.find();
+  console.log("All registered user list: ", { user });
   console.log(`Server is running on http://localhost:${port}`);
 });

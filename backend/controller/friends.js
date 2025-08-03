@@ -1,5 +1,6 @@
 const { socketfuntion } = require("../config/socket");
 const { io } = require("../index");
+const Message = require("../model/Messages");
 const User = require("../model/User");
 
 exports.addFriend = async (req, res) => {
@@ -66,8 +67,21 @@ exports.fetchFriends = async (req, res) => {
 
     const user = await User.findById(userId).populate(
       "friends",
-      "name email avatar isOnline lastSeen"
+      "_id name email avatar isOnline lastSeen"
     );
+
+    // const messages = await Promise.all(
+    //   user.friends.map(async(friend) => {
+    //             const allMessages = await Message.find({
+    //               $or: [
+    //                 { sender: user._id, receiver: friend._id },
+    //                 { sender: friend._id, receiver: user._id },
+    //               ],
+    //             });
+    //             return allMessages;
+    //         })
+
+    //     );
 
     if (!user) {
       return res
@@ -75,7 +89,9 @@ exports.fetchFriends = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    console.log("Fetched friends for user:", userId, user.friends);
+    console.log("Fetched friends for user:", {
+      friends: user.friends,
+    });
 
     res.status(200).json({
       success: true,
@@ -115,6 +131,42 @@ exports.deleteFriendForYou = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete Friend (You) Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// DELETE delete-friend-both
+exports.deleteFriendForBoth = async (req, res) => {
+  try {
+    console.log("user to delete:", req.body);
+    const { currentUserId, targetUserId } = req.body;
+
+    if (!currentUserId || !targetUserId) {
+      return res.status(400).json({ error: "Both user IDs are required." });
+    }
+
+    // Remove targetUserId from currentUser's friend list
+    await User.findByIdAndUpdate(currentUserId, {
+      $pull: { friends: targetUserId },
+    });
+
+    // Remove currentUserId from targetUser's friend list
+    await User.findByIdAndUpdate(targetUserId, {
+      $pull: { friends: currentUserId },
+    });
+
+    // Optionally: return updated current user info
+    const updatedUser = await User.findById(currentUserId).populate(
+      "friends",
+      "name email avatar isOnline lastSeen"
+    );
+    console.log("updatedUser:", updatedUser);
+    return res.status(200).json({
+      message: "Friend deleted from both users.",
+      friends: updatedUser.friends,
+    });
+  } catch (error) {
+    console.error("Delete Friend (Both) Error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

@@ -2,7 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Header";
 import SideBar from "./components/SideBar";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import MessageContext from "./store/Messages/MessageContext";
 import FullPageLoader from "./components/FullPageLoader";
 import { ToastContainer } from "react-toastify";
@@ -14,10 +14,18 @@ import {
 import CallerContext from "./store/CallerContext/CallerContext";
 import Socket from "../config/Socket";
 import AfterAcceptingCall from "./components/AfterAcceptingCall";
+import senderCallRing from "./assets/senderCallRing.mp3";
+import receiverCallRing from "./assets/receiverCallRing.mp3";
+import { FaSpinner } from "react-icons/fa";
 
 function App() {
-  const { loading, user: currentUser, users } = useContext(MessageContext); // or any global loading logic
-
+  const {
+    loading,
+    user: currentUser,
+    users,
+    fetchCurrentUser,
+    setUsers,
+  } = useContext(MessageContext); // or any global loading logic
   const {
     incomingCall,
     setIncomingCall,
@@ -43,6 +51,8 @@ function App() {
     callRef,
   } = useContext(CallerContext);
   const navigate = useNavigate();
+  const [localLoading, setLocalLoading] = useState(false);
+
   useEffect(() => {
     serIsCurrectUser(currentUser);
     if (loading) {
@@ -53,6 +63,49 @@ function App() {
       navigate("/login");
     }
   }, [currentUser, navigate, loading]);
+
+  //   useEffect(() => {
+  //     setLocalLoading(true);
+  //     const load = fetchCurrentUser(false);
+  //     setLocalLoading(load);
+  // let timeout = null
+  //     if(load !== false){
+  //       timeout = setTimeout(() => {
+  //   setLocalLoading(false);
+  // },2000)
+  //     }
+
+  // return ()=>{
+  //   if(load !==false){
+  //     clearTimeout(timeout);
+  //   }
+  // }
+
+  //   }, [window.location.href]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const socket = Socket(currentUser);
+
+    if (!socket) return;
+
+    if (!users || users.length === 0) return;
+
+    const handleAddUser = (newUser) => {
+      const exists = users.some((u) => u._id === newUser._id);
+      if (!exists) {
+        if (newUser._id !== currentUser._id) {
+          setUsers((prev) => [...prev, newUser]);
+        }
+      }
+    };
+    socket.on("add-user", handleAddUser);
+
+    return () => {
+      socket.off("add-user");
+    };
+  }, [currentUser, users]);
 
   const onReject = () => {
     endCall({
@@ -103,11 +156,23 @@ function App() {
     socket.on("call-end", ({ from }) => {});
   }, []);
 
-  // console.log("incomingCall", mode);
-  console.log("callRef.current", callRef.current);
-
   return (
     <div className="app">
+      {(callRef.current === "incomingCall" ||
+        callRef.current === "callRequest") && (
+        <audio
+          loop={true}
+          autoPlay={true}
+          src={
+            callRef.current === "callRequest"
+              ? senderCallRing
+              : callRef.current === "incomingCall"
+              ? receiverCallRing
+              : ""
+          }
+        ></audio>
+      )}
+
       {loading ? (
         <FullPageLoader />
       ) : currentUser ? (

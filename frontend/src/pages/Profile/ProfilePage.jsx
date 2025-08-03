@@ -22,6 +22,9 @@ const ProfilePage = () => {
   const [editMode, setEditMode] = useState(false);
   const [showPwdFields, setShowPwdFields] = useState(false);
   const [socket, setSocket] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
+
   useEffect(() => {
     if (!user) return;
 
@@ -35,9 +38,9 @@ const ProfilePage = () => {
         email: user.email,
         bio: user.bio || "",
         avatar: user.avatar?.url || "",
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+        // currentPassword: "",
+        // newPassword: "",
+        // confirmPassword: "",
       });
     }
   }, [user]);
@@ -48,16 +51,67 @@ const ProfilePage = () => {
 
   const handleAvatar = (e) => {
     const file = e.target.files[0];
+    setFile(file);
     if (file) {
       setForm({ ...form, avatar: URL.createObjectURL(file) });
     }
   };
 
+  const onUpdateProfile = async (form) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/profile/${user._id}`,
+        form,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.status === 200) {
+        toast.success("Profile updated successfully", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light", // or "dark", "colored"
+        });
+        console.log(res.data.user);
+        setForm({
+          name: res.data.user.name,
+          email: res.data.user.email,
+          bio: res.data.user.bio || "",
+          avatar: res.data.user.avatar?.url || "",
+        });
+      }
+    } catch (err) {
+      console.error("Profile update failed:", err);
+      toast.error("Profile update failed. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    } finally {
+      setLoading(false);
+      setEditMode(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // onUpdateProfile(form);
-    setEditMode(false);
-    setShowPwdFields(false);
+    const form = new FormData(e.target);
+    if (file) {
+      form.append("file", file);
+    }
+    onUpdateProfile(form);
   };
 
   const handleLogout = async () => {
@@ -116,6 +170,7 @@ const ProfilePage = () => {
                   accept="image/*"
                   onChange={handleAvatar}
                   hidden
+                  name="file"
                 />
               </label>
             )}
@@ -237,8 +292,12 @@ const ProfilePage = () => {
               {/* </> */}
               {/* )} */}
 
-              <button type="submit" className={styles.saveBtn}>
-                Save Changes
+              <button
+                disabled={loading}
+                type="submit"
+                className={styles.saveBtn}
+              >
+                {loading ? "Saving..." : "Save Changes"}
               </button>
             </>
           )}

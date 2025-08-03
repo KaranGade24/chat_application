@@ -31,14 +31,21 @@ const UserInfoModal = ({ user, onClose, onBack, selectedUserStatus }) => {
 
   const handleDeleteForBoth = async () => {
     // Remove each other from friend list
-    await axios.delete(
-      `${import.meta.env.VITE_API_URL}/friends/delete-friend-both`,
+    const res = await axios.delete(
+      `${import.meta.env.VITE_API_URL}/friends/delete-both-user-from-side`,
       {
-        data: { userOne: currentUserId, userTwo: user._id },
+        data: {
+          currentUserId: currentUser._id,
+          targetUserId: selectedUser._id,
+        },
         withCredentials: true,
       }
     );
-    onClose(); // close modal
+    if (res.status === 200) {
+      setUsers(res.data.friends);
+      onBack();
+      onClose(); // close modal
+    }
   };
 
   return (

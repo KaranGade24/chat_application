@@ -9,6 +9,9 @@ import Socket from "../../config/Socket";
 import { useMessageContext } from "../store/Messages/MessageContextProvider";
 import { ClipLoader } from "react-spinners";
 import UserInfoModal from "./UserInfoModal";
+import { FileUpIcon } from "lucide-react";
+import axios from "axios";
+import SelectedFilesPreview from "./SelectedFilesPreview";
 
 export default function UserChat({
   selectedUser,
@@ -32,12 +35,17 @@ export default function UserChat({
   const [isTyping, setIsTyping] = useState(false);
   const [selectedUserStatus, setSelectedUserStatus] = useState(null);
   const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [selectedFilesPreviewModel, setSelectedFilesPreviewModel] =
+    useState(false);
+  const [files, setFiles] = useState([]);
 
   // Initialize socket once per user
   const socket = useMemo(() => {
     if (!user) return null;
     return Socket(user);
   }, [user]);
+  const [loadingToSendFiles, setLoadingToSendFiles] = useState(false);
 
   // listen is online or lastSeen
 
@@ -154,7 +162,7 @@ export default function UserChat({
   useEffect(() => {
     const chatBody = document.querySelector(`.${styles.chatBody}`);
     if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
-  }, [userMessages]);
+  }, [userMessages, selectedFilesPreviewModel, users]);
 
   // Listen for incoming messages over socket
   useEffect(() => {
@@ -164,7 +172,12 @@ export default function UserChat({
       if (userId === selectedUser._id) {
         setUserMessages((prev) => [
           ...prev,
-          { _id: userId, from: "user", text: message },
+          {
+            _id: userId,
+            from: "user",
+            text: message?.text ? message?.text : "",
+            attachments: message?.attachments ? message?.attachments : [],
+          },
         ]);
 
         // Update context (so future reload has the message)
@@ -175,7 +188,12 @@ export default function UserChat({
                   ...u,
                   Messages: [
                     ...(u.Messages || []),
-                    { _id: userId, from: "user", text: message },
+                    {
+                      _id: userId,
+                      from: "user",
+                      text: message?.text ? message.text : "",
+                      attachments: message?.attachments || [],
+                    },
                   ],
                 }
               : u
@@ -190,11 +208,88 @@ export default function UserChat({
     };
   }, [socket, selectedUser]);
 
-  const handleSend = () => {
-    const text = input.trim();
-    if (!text || !selectedUser || !user) return;
+  // Remove a file from the selected files preview
+  const onRemoveFile = (index) => {
+    const filteredFiles = files.filter((_, i) => i !== index);
+    setFiles(filteredFiles);
+  };
 
-    const newMessage = { _id: user._id, from: "me", text };
+  //handel file input with upto limt of 10MB file user can upload
+  const handleFileInput = async (selectedFiles) => {
+    const files = Array.from(selectedFiles);
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+
+    const validFiles = [];
+    for (const file of files) {
+      if (file.size > maxSizeInBytes) {
+        alert(
+          `File "${file.name}" exceeds the 10MB limit and will be skipped.`
+        );
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (validFiles.length > 0) {
+      const formData = new FormData();
+      validFiles.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      // Add other fields like receiver and sender to FormData
+      formData.append("receiverId", selectedUser._id);
+      formData.append("senderId", user._id);
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_API_URL}/chatfiles`,
+          formData,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        if (res.status === 201) {
+          const msg = {
+            _id: user._id,
+            from: "me",
+            text: "",
+            attachments: res.data.attachments,
+          };
+
+          socket.emit("send-message", {
+            sender: user._id,
+            receiver: selectedUser._id,
+            message: {
+              text: "",
+              attachments: [...res.data.attachments],
+              isFile: true,
+            },
+          });
+
+          setUserMessages((prev) => [...prev, msg]);
+        }
+      } catch (err) {
+        console.error("Upload failed:", err);
+      } finally {
+        setLoadingToSendFiles(false);
+      }
+    }
+
+    setFiles([]);
+    setSelectedFilesPreviewModel(false);
+  };
+
+  const handleSend = () => {
+    const msg = input.trim();
+    if (!msg || !selectedUser || !user) return;
+
+    const newMessage = {
+      _id: user._id,
+      from: "me",
+      sender: user._id,
+      receiver: selectedUser._id,
+      text: msg,
+    };
 
     // Locally update visible messages
     setUserMessages((prev) => [...prev, newMessage]);
@@ -203,7 +298,7 @@ export default function UserChat({
     socket.emit("send-message", {
       sender: user._id,
       receiver: selectedUser._id,
-      message: text,
+      message: { text: msg, isFile: false },
     });
 
     // ✅ Also update context (users list)
@@ -284,7 +379,7 @@ export default function UserChat({
               user={selectedUser}
               onBack={onBack}
               onClose={(e) => {
-                e.preventDefault();
+                // e.preventDefault();
                 setShowModal(false);
               }}
             />
@@ -302,34 +397,149 @@ export default function UserChat({
                   className={
                     msg.from === "me" ? styles.myMessage : styles.theirMessage
                   }
+                  style={{
+                    backgroundColor: msg?.attachments?.length
+                      ? "hsl(287deg 29% 47% / 49%)"
+                      : "",
+                    padding: msg?.attachments?.length ? "5px 5px" : "",
+                  }}
                 >
-                  {msg.text}
+                  <p style={{ margin: "0px" }}> {msg.text}</p>
+                  <div className={styles.attachmentWrapper}>
+                    {msg?.attachments &&
+                      msg.attachments.map((file, idx) => {
+                        const fileType = file?.type;
+                        const fileURL = file?.url;
+
+                        return (
+                          <div key={idx}>
+                            {fileType?.startsWith("image/") ? (
+                              <a
+                                href={fileURL}
+                                download={file.originalname}
+                                target="_blank"
+                              >
+                                <img
+                                  src={fileURL}
+                                  alt={file.originalname || "image"}
+                                  className={styles.chatImage}
+                                />
+                              </a>
+                            ) : fileType?.startsWith("video/") ? (
+                              <a
+                                href={fileURL}
+                                download={file.originalname}
+                                target="_blank"
+                              >
+                                {" "}
+                                <video
+                                  controls
+                                  src={fileURL}
+                                  className={styles.chatVideo}
+                                ></video>{" "}
+                              </a>
+                            ) : fileType === "application/pdf" ? (
+                              <a
+                                href={fileURL}
+                                download={file.originalname}
+                                target="_blank"
+                              >
+                                <embed
+                                  src={fileURL}
+                                  type="application/pdf"
+                                  width="100%"
+                                  height="200px"
+                                  className={styles.chatPDF}
+                                />
+                              </a>
+                            ) : (
+                              <a
+                                href={fileURL}
+                                download={file.originalname}
+                                className={styles.chatFileDownload}
+                              >
+                                📄 {file.originalname}
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
                 </div>
               ))
             )}
           </div>
 
           <div className={styles.inputArea}>
-            <button
-              className={styles.emojiBtn}
-              onClick={() => setShowEmojiPicker((v) => !v)}
-            >
-              😊
-            </button>
-            {showEmojiPicker && (
-              <div className={styles.emojiPicker}>
-                <EmojiPicker onEmojiClick={handleEmojiClick} />
-              </div>
+            {!selectedFilesPreviewModel && (
+              <>
+                <button
+                  style={{ margin: "5px", width: "24px", height: "24px" }}
+                  className={styles.emojiBtn}
+                  onClick={() => setShowEmojiPicker((v) => !v)}
+                >
+                  😊
+                </button>
+                {showEmojiPicker && (
+                  <div className={styles.emojiPicker}>
+                    <EmojiPicker onEmojiClick={handleEmojiClick} />
+                  </div>
+                )}
+              </>
             )}
-            <input
-              className={styles.input}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Type a message..."
-            />
-            <button className={styles.sendBtn} onClick={handleSend}>
+
+            <span>
+              <input
+                multiple
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  e.preventDefault();
+                  setSelectedFilesPreviewModel(true);
+                  setFiles(Array.from(e.target.files));
+                }}
+              />
+
+              {selectedFilesPreviewModel && (
+                <SelectedFilesPreview
+                  onSendFiles={handleFileInput}
+                  files={files}
+                  onRemoveFile={onRemoveFile}
+                  loading={loadingToSendFiles}
+                />
+              )}
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{ margin: "5px" }}
+              >
+                <FileUpIcon />
+              </button>
+            </span>
+
+            {!selectedFilesPreviewModel && (
+              <input
+                className={styles.input}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder="Type a message..."
+              />
+            )}
+            <button
+              className={styles.sendBtn}
+              onClick={(e) => {
+                e.preventDefault;
+                if (selectedFilesPreviewModel) {
+                  handleFileInput(files);
+                  setLoadingToSendFiles(true);
+                } else {
+                  handleSend();
+                }
+              }}
+            >
               <AiOutlineSend size={20} />
             </button>
           </div>

@@ -25,7 +25,7 @@ function MessageContextProvider({ children }) {
       setUser(res.data.user);
     } catch (err) {
       console.error("Auth error:", err?.response?.status, err?.response?.data);
-
+      setUser(null);
       // 401 Unauthorized
       if (err?.response?.status === 401) {
         setUser(null);
@@ -69,6 +69,7 @@ function MessageContextProvider({ children }) {
 
       const formatted = response.data.map((msg) => {
         return {
+          ...msg,
           _id: msg.sender === senderId ? senderId : msg.receiver,
           from: msg.sender === senderId ? "me" : "user",
           text: msg.message,
@@ -134,7 +135,31 @@ function MessageContextProvider({ children }) {
     });
   }, [friendList, selectedUser]);
 
-  //listen incomming call
+  //Listen add Friend
+  useEffect(() => {
+    if (!user) return;
+
+    const socket = Socket(user);
+
+    if (!socket) return;
+
+    if (!friendList || friendList.length === 0) return;
+
+    const handleAddUser = (newUser) => {
+      const exists = friendList.some((u) => u._id === newUser._id);
+      if (!exists) {
+        if (newUser._id !== user._id) {
+          setFriendList((prev) => [...prev, newUser]);
+        }
+      }
+    };
+
+    socket.on("add-user", handleAddUser);
+
+    return () => {
+      socket.off("add-user");
+    };
+  }, [user, friendList]);
 
   return (
     <MessageContext.Provider
@@ -152,6 +177,7 @@ function MessageContextProvider({ children }) {
         messageLoadFriendList,
         userStatuses,
         setUserStatuses,
+        fetchCurrentUser,
       }}
     >
       {children}

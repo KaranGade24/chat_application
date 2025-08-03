@@ -63,17 +63,21 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
                 style={{ color: "black" }}
                 className={`${styles.status} ${styles[user.status]}`}
               >
-                {userStatuses.find((u) => u._id === user._id)?.isOnline
-                  ? "online"
-                  : userStatuses.find((u) => u._id === user._id)?.lastSeen
-                  ? `last seen: ${new Date(
-                      userStatuses.find((u) => u._id === user._id).lastSeen
-                    ).toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}`
-                  : "offline"}
+                {(() => {
+                  const status = userStatuses.find((u) => u._id === user._id);
+
+                  if (status?.isOnline) {
+                    return "online";
+                  } else if (status?.lastSeen) {
+                    const formatted = new Intl.DateTimeFormat("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(new Date(status.lastSeen));
+                    return `last seen: ${formatted}`;
+                  } else {
+                    return "offline";
+                  }
+                })()}
               </span>
 
               {mode === "call" && (

@@ -4,10 +4,13 @@ import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 import MessageContext from "../../store/Messages/MessageContext";
 import { toast, ToastContainer } from "react-toastify";
+import { LoaderCircle } from "lucide-react";
+import { FaSpinner } from "react-icons/fa";
 
 const Login = () => {
-  const { setUser, setLoading } = useContext(MessageContext); // Assuming you have a context to set the user
+  const { setUser, setLoading, loading } = useContext(MessageContext); // Assuming you have a context to set the user
   const navigate = useNavigate();
+
   const onLogin = async (user) => {
     try {
       setLoading(true); // Set loading state to true
@@ -105,8 +108,16 @@ const Login = () => {
               className={styles.input}
               required
             />
-            <button type="submit" className={styles.button}>
-              Login
+            <button
+              disabled={loading ? true : false}
+              type="submit"
+              className={styles.button}
+            >
+              {loading ? (
+                <FaSpinner className={loading ? styles.spinner : ""} />
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
           <p className={styles.footerText}>

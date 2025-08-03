@@ -41,7 +41,6 @@ export default function CallVideoPage() {
 
   const handleAction = async (selectUser, action) => {
     const socket = Socket(user);
-    console.log(socket, "from call videpage");
     if (!socket) return;
 
     if (!friendList || friendList.length === 0) return;
@@ -55,7 +54,6 @@ export default function CallVideoPage() {
         return;
       }
 
-      console.log("selectUser", selectUser, "action", action);
       setActiveUser(selectUser);
       setMode(action);
 
@@ -74,6 +72,28 @@ export default function CallVideoPage() {
           setRemoteStream,
         }
       );
+
+      // const automaticEndTheCall = setTimeout(() => {
+      //   const targetUserId = selectUser?._id;
+      //   const currentUserId = user?._id;
+
+      //   endCall({
+      //     localStream,
+      //     peerConnection,
+      //     setInCall,
+      //     setLocalStream,
+      //     setPeerConnection,
+      //     setCallee,
+      //     setCallType,
+      //     setIncomingCall,
+      //     targetUserId,
+      //     currentUserId,
+      //     storeSocket,
+      //     setActiveUser,
+      //     setMode,
+      //     callRef,
+      //   });
+      // }, 20000);
     });
   };
 

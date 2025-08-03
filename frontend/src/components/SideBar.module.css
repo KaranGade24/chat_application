@@ -1,3 +1,27 @@
+.sidebar a:hover {
+  height: fit-content;
+  width: 100%;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.527);
+  border-left: 3px solid orange;
+}
+
+.isActive {
+  padding: 0 10px 5px 0;
+  height: fit-content;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.527);
+  border-left: 3px solid orange;
+}
+
+.sidebar a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  color: inherit;
+  transition: background-color 0.2s, color 0.2s;
+}
 .mainContainer {
   height: 100vh;
   width: 60px;
@@ -15,24 +39,18 @@
   gap: 20px;
   color: white;
 }
+
 .sidebar p {
   padding: 10px 0;
   min-width: 100%;
   text-align: center;
 }
-.sidebar p:hover {
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.527);
-  border-left: 3px solid orange;
-}
-.isSelected {
-  background-color: rgba(255, 255, 255, 0.527);
-  border-left: 3px solid orange;
-}
-.sidebar p:first-child {
-  padding-top: 15px;
-  border: 0px;
-  margin: 0 0 15px 0;
+
+.logo {
+  display: flex;
+  gap: 0;
+  margin: 0;
+  padding-bottom: 0px;
 }
 
 @media (max-width: 480px) {

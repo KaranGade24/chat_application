@@ -237,6 +237,43 @@
   animation: blink 1s infinite;
 }
 
+.attachmentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chatImage {
+  width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.chatVideo {
+  width: 300px;
+  max-height: 250px;
+  border-radius: 10px;
+}
+
+.chatPDF {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.chatFileDownload {
+  font-weight: 500;
+  text-decoration: none;
+  color: #2e7dff;
+  background: #f5f5f5;
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  max-width: 300px;
+  overflow-wrap: break-word;
+}
+
 @keyframes blink {
   0%,
   100% {
@@ -259,6 +296,22 @@
 }
 
 @media (max-width: 768px) {
+  .chatPDF {
+    margin-right: 10px;
+    width: 120px;
+  }
+  .chatImage {
+    margin-right: 10px;
+    width: 120px;
+  }
+  .chatVideo {
+    margin-right: 10px;
+    width: 120px;
+    height: auto;
+  }
+  a {
+    cursor: pointer;
+  }
   .backArrow {
     display: block;
   }

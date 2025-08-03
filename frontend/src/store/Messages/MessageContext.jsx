@@ -15,6 +15,7 @@ const MessageContext = createContext({
   setUsers: () => {},
   userStatuses: null,
   setUserStatuses: () => {},
+  fetchCurrentUser: () => {},
 });
 
 export default MessageContext;

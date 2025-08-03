@@ -1,9 +1,12 @@
 // store/CallerContext/CallerContextProvider.js
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import CallerContext from "./CallerContext";
 import Socket from "../../../config/Socket";
+import MessageContext from "../Messages/MessageContext";
+import { endCall } from "../../pages/CallVideoPage/AllCallFunctions";
 
 const CallerContextProvider = ({ children }) => {
+  const { setUserStatuses, users: friendList } = useContext(MessageContext);
   const [inCall, setInCall] = useState(false);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
@@ -61,7 +64,16 @@ const CallerContextProvider = ({ children }) => {
     socketInstance.on("ice-candidate", async ({ candidate }) => {
       const pc = peerConnectionRef.current;
       const iceCandidate = new RTCIceCandidate(candidate);
-      if (!pc || !pc.remoteDescription?.type) {
+
+      if (!pc || pc.signalingState === "closed") {
+        console.warn(
+          "🚫 Skipping ICE candidate — peerConnection is null or closed."
+        );
+        return;
+      }
+
+      if (!pc.remoteDescription || !pc.remoteDescription.type) {
+        // Queue the ICE until description is ready
         pendingCandidatesRef.current.push(iceCandidate);
       } else {
         try {
@@ -76,8 +88,6 @@ const CallerContextProvider = ({ children }) => {
     socketInstance.on("call-end", ({ to, me }) => {
       const isReceiver = isCurrectUser?._id !== to;
       if (!isReceiver) return;
-
-      // console.log("📞 Call ended by other user", me);
 
       localStream?.getTracks().forEach((track) => track.stop());
       peerConnection?.close();
@@ -97,7 +107,9 @@ const CallerContextProvider = ({ children }) => {
       setMode(null);
       setActiveUser(null);
       callRef.current = "callEnded";
-      alert("📞 Call was ended.");
+      setTimeout(() => {
+        alert("📞 Call ended.");
+      }, 1000);
     });
 
     // 🔁 Clean up listeners
@@ -108,6 +120,18 @@ const CallerContextProvider = ({ children }) => {
       socketInstance.off("call-end");
     };
   }, [isCurrectUser]);
+
+  useEffect(() => {
+    if (!storeSocket) return;
+
+    storeSocket.emit("check-user-online", friendList, (statusList) => {
+      setUserStatuses(statusList);
+    });
+
+    return () => {
+      storeSocket.off("check-user-online");
+    };
+  }, [friendList, storeSocket]);
 
   return (
     <CallerContext.Provider

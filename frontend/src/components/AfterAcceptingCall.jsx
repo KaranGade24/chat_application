@@ -24,8 +24,6 @@ const AfterAcceptingCall = ({
   const audioRef = useRef(null);
   const isVideo = mode === "video";
 
-  console.log("mode", mode, "isVide", isVideo, "iscam", isCamOn);
-
   useEffect(() => {
     setIsCamOn(mode === "video");
   }, [mode]);
