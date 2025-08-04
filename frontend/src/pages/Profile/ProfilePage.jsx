@@ -143,7 +143,7 @@ const ProfilePage = () => {
       });
       // Redirect to login
       setTimeout(() => {
-        navigate("/login");
+        navigate("/");
       }, 3000);
     } catch (err) {
       console.error("Logout failed:", err);

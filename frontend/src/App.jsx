@@ -60,28 +60,9 @@ function App() {
     }
     // If user is not authenticated, redirect to login
     if (!currentUser) {
-      navigate("/login");
+      navigate("/");
     }
   }, [currentUser, navigate, loading]);
-
-  //   useEffect(() => {
-  //     setLocalLoading(true);
-  //     const load = fetchCurrentUser(false);
-  //     setLocalLoading(load);
-  // let timeout = null
-  //     if(load !== false){
-  //       timeout = setTimeout(() => {
-  //   setLocalLoading(false);
-  // },2000)
-  //     }
-
-  // return ()=>{
-  //   if(load !==false){
-  //     clearTimeout(timeout);
-  //   }
-  // }
-
-  //   }, [window.location.href]);
 
   useEffect(() => {
     if (!currentUser) return;

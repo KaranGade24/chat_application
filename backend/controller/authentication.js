@@ -1,7 +1,11 @@
 const User = require("../model/User");
 const jwt = require("jsonwebtoken");
+const nodeMailer = require("nodemailer");
+// In-memory store: email -> { otp, expiresAt }
+const otpStore = new Map();
+// inside sendOtpToMail
+const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes from now
 
-// Cookie + JWT
 const sendToken = (user, res, statusCode) => {
   try {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -29,6 +33,99 @@ const sendToken = (user, res, statusCode) => {
   } catch (err) {
     console.error("Error generating token:", err);
     res.status(500).json({ message: "Error generating token" });
+  }
+};
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Create and send otp to mail
+exports.sendOtpToMail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log("Sending email to:", email);
+    // Create a transporter
+
+    const transporter = nodeMailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const otp = generateOTP();
+    otpStore.set(email, { otp, expiresAt });
+    console.log("Your OTP is stored in memory :", otp, otpStore);
+    //  Create mail options
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "ChatFlow OTP Verification",
+      html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background: #f4f4f4;">
+      <div style="text-align: center; padding-bottom: 20px;">
+        <h2 style="color: #4c8bf5; margin-bottom: 0;">ChatFlow</h2>
+        <p style="font-size: 18px; color: #333;">Verify your email to continue</p>
+      </div>
+      <div style="background: #ffffff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <p style="font-size: 16px; color: #333;">Hi there 👋,</p>
+        <p style="font-size: 16px; color: #333;">Here is your OTP to verify your email with <strong>ChatFlow</strong>:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="display: inline-block; background-color: #4c8bf5; color: white; font-size: 24px; padding: 12px 24px; border-radius: 6px; letter-spacing: 4px;">
+            ${otp}
+          </span>
+        </div>
+        <p style="font-size: 14px; color: #777;">This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+        <p style="font-size: 14px; color: #777;">If you did not request this, please ignore this email.</p>
+        <p style="font-size: 14px; color: #333;">Thanks,<br/>The ChatFlow Team</p>
+      </div>
+      <div style="text-align: center; font-size: 12px; color: #aaa; padding-top: 20px;">
+        <p>© ${new Date().getFullYear()} ChatFlow. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", info.response);
+    res.status(200).send("Email sent successfully");
+  } catch (err) {
+    console.error("Error sending email:", err);
+    res.send("Error sending email");
+  }
+};
+
+//virify otp
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    console.log("Verifying OTP for email:", email, otp);
+    // Check if OTP exists for the given email
+    const record = otpStore.get(email);
+
+    if (!record) {
+      return res.status(400).json({ message: "No OTP found or expired." });
+    }
+
+    // Check if expired
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(email); // Remove expired OTP
+      return res
+        .status(400)
+        .json({ message: "OTP expired. Please request a new one." });
+    }
+
+    // Compare OTP
+    if (record.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP." });
+    }
+
+    // Success: OTP is valid
+    otpStore.delete(email); // Optional: remove after successful verification
+    return res.status(200).json({ message: "OTP verified successfully." });
+  } catch (err) {
+    return res.status(500).json({ message: "Error verifying OTP." });
   }
 };
 
