@@ -72,12 +72,13 @@ app.use("/profile", authenticate, profileRouter);
 app.get(/.*/,(req,res)=>{
   res.sendFile(path.join(__dirname,"public","dist","index.html"));
 })
+console.log(path.join(__dirname,"public","dist","index.html"))
 
 
 const port = 8080;
 
 server.listen(port, async () => {
-  const user = await User.find();
-  console.log("All registered user list: ", { user });
+  // const user = await User.find();
+  // console.log("All registered user list: ", { user });
   console.log(`Server is running on http://localhost:${port}`);
 });
