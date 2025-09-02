@@ -12,7 +12,7 @@ body {
   display: flex;
   height: 100vh;
   width: 100vw;
-  /* overflow: hidden; */
+  overflow: hidden;
 }
 
 .main {
@@ -20,4 +20,5 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden;
 }

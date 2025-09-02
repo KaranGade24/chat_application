@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./AfterAcceptingCall.module.css";
 import {
   FiMic,
@@ -8,98 +8,105 @@ import {
   FiClock,
   FiUser,
 } from "react-icons/fi";
+import MessageContext from "../store/Messages/MessageContext";
+import CallerContext from "../store/CallerContext/CallerContext";
 
 const AfterAcceptingCall = ({
   mode, // "voice" or "video"
-  localStream,
-  remoteStream,
-  onEnd,
-  user, // callee user info
 }) => {
-  const [muted, setMuted] = useState(false);
-  const [isCamOn, setIsCamOn] = useState(mode === "video");
+  const [muted, setMuted] = useState(true);
   const [callTime, setCallTime] = useState(0);
+  const { localStreamRef, remoteStreamRef, endCall, activeUser } =
+    useContext(CallerContext);
+  const activeUserRef = useRef(activeUser.current);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const audioRef = useRef(null);
-  const isVideo = mode === "video";
+
+  const { user } = useContext(MessageContext);
+  const isVideoCall = mode === "video" ? true : false;
 
   useEffect(() => {
-    setIsCamOn(mode === "video");
-  }, [mode]);
+    activeUserRef.current = activeUser.current;
+  }, [activeUser, activeUser.current]);
 
-  // 🕒 Call Timer
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCallTime((prev) => prev + 1);
-    }, 1000);
+    if (mode !== "video") return;
+
+    if (localVideoRef.current && localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+
+    if (remoteVideoRef.current && remoteStreamRef.current) {
+      remoteVideoRef.current.srcObject = remoteStreamRef.current;
+    }
+  }, [
+    localStreamRef,
+    remoteStreamRef,
+    remoteStreamRef.current,
+    localStreamRef.current,
+    localVideoRef,
+    remoteVideoRef,
+  ]);
+
+  useEffect(() => {
+    // If mode is a ref, use mode.current
+    if (mode === "video") return;
+
+    if (remoteStreamRef.current && audioRef.current) {
+      audioRef.current.srcObject = remoteStreamRef.current;
+    }
+  }, [remoteStreamRef.current, audioRef.current]); // Only include .current if you absolutely need to
+
+  // 🕒 Timer
+  useEffect(() => {
+    const interval = setInterval(() => setCallTime((t) => t + 1), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // 🎥 Stream Binding
-  useEffect(() => {
-    if (isCamOn) {
-      if (localVideoRef.current && localStream) {
-        localVideoRef.current.srcObject = localStream;
-      }
-      if (remoteVideoRef.current && remoteStream) {
-        remoteVideoRef.current.srcObject = remoteStream;
-      }
-    } else if (mode === "voice" && audioRef.current && remoteStream) {
-      audioRef.current.srcObject = remoteStream;
-    }
-  }, [localStream, remoteStream, mode]);
-
-  // 🔄 Re-bind check (for stream issues)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (isVideo && remoteVideoRef.current?.srcObject !== remoteStream) {
-        remoteVideoRef.current.srcObject = remoteStream;
-      }
-      if (isVideo && localVideoRef.current?.srcObject !== localStream) {
-        localVideoRef.current.srcObject = localStream;
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isVideo, localStream, remoteStream]);
-
   // 🎙️ Mute toggle
   const handleMuteToggle = () => {
-    const audioTrack = localStream?.getAudioTracks?.()[0];
-    if (audioTrack) audioTrack.enabled = muted;
-    setMuted((prev) => !prev);
-  };
-
-  // 🔊 Speaker Toggle
-  const toggleSpeaker = async () => {
-    if ("setSinkId" in HTMLMediaElement.prototype) {
-      try {
-        const current = audioRef.current || remoteVideoRef.current;
-        const newSink =
-          current.sinkId === "default" ? "communications" : "default";
-        await current.setSinkId(newSink);
-        alert("Speaker toggled");
-      } catch (e) {
-        console.error("Speaker error", e);
-      }
-    } else {
-      alert("Speaker control not supported");
+    const track = localStreamRef?.current?.getAudioTracks?.()[0];
+    if (track) {
+      track.enabled = !muted;
+      setMuted((m) => !m);
     }
   };
 
-  // ⏱️ Format time
-  const formatTime = (sec) => {
-    const m = Math.floor(sec / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (sec % 60).toString().padStart(2, "0");
+  // 🔊 Toggle Speaker
+  const toggleSpeaker = async () => {
+    const element = isVideoCall ? remoteVideoRef.current : audioRef.current;
+
+    if ("setSinkId" in HTMLMediaElement.prototype) {
+      try {
+        const newSink =
+          element.sinkId === "default" ? "communications" : "default";
+        await element.setSinkId(newSink);
+        alert("Speaker output toggled.");
+      } catch (error) {
+        console.error("Speaker toggle error", error);
+      }
+    } else {
+      alert("Speaker control not supported in your browser.");
+    }
+  };
+
+  // ⏹️ End Call Handler
+  const handleEndCall = () => {
+    endCall();
+  };
+
+  // ⏱️ Format time (mm:ss)
+  const formatTime = (seconds) => {
+    const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const s = String(seconds % 60).padStart(2, "0");
     return `${m}:${s}`;
   };
 
   return (
     <div className={styles.callContainer}>
-      {/* 📞 Render based on call type */}
-      {isVideo ? (
+      {/* 🔴 Video Call View */}
+      {isVideoCall ? (
         <>
           <video
             ref={remoteVideoRef}
@@ -122,35 +129,37 @@ const AfterAcceptingCall = ({
         </>
       )}
 
-      {/* 👤 Caller Info & Timer */}
+      {/* ℹ️ Overlay Controls */}
       <div className={styles.overlay}>
         <div className={styles.userInfo}>
           <FiUser className={styles.userIcon} />
-          <h2>{user?.name || "Unknown"}</h2>
+          <h2>{activeUser?.current?.name || "Unknown"}</h2>
           <div className={styles.callDuration}>
             <FiClock />
             <span>{formatTime(callTime)}</span>
           </div>
         </div>
 
-        {/* 🎛️ Controls */}
         <div className={styles.controls}>
+          {/* 🎙️ Mute */}
           <button
             className={`${styles.controlBtn} ${muted ? styles.active : ""}`}
             onClick={handleMuteToggle}
           >
-            {muted ? <FiMicOff /> : <FiMic />}
-            <span>{muted ? "Unmute" : "Mute"}</span>
+            {muted ? <FiMic /> : <FiMicOff />}
+            <span>{muted ? "Mute" : "Unmute"}</span>
           </button>
 
+          {/* 🔊 Speaker */}
           <button className={styles.controlBtn} onClick={toggleSpeaker}>
             <FiVolume2 />
             <span>Speaker</span>
           </button>
 
+          {/* ⛔ End Call */}
           <button
             className={`${styles.controlBtn} ${styles.hangUp}`}
-            onClick={onEnd}
+            onClick={handleEndCall}
           >
             <FiPhoneOff />
             <span>End</span>

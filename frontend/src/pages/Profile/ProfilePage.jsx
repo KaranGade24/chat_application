@@ -34,7 +34,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (user) {
       setForm({
-        name: user.name,
+        name: user?.name,
         email: user.email,
         bio: user.bio || "",
         avatar: user.avatar?.url || "",
@@ -79,7 +79,6 @@ const ProfilePage = () => {
           progress: undefined,
           theme: "light", // or "dark", "colored"
         });
-        console.log(res.data.user);
         setForm({
           name: res.data.user.name,
           email: res.data.user.email,
@@ -117,34 +116,38 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     try {
       if (confirm("You want to logout")) {
-        await axios.get(`${import.meta.env.VITE_API_URL}/auth/logout`, {
-          withCredentials: true, // IMPORTANT: clears cookie
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/auth/logout`,
+          {
+            withCredentials: true, // IMPORTANT: clears cookie
+          }
+        );
+      }
+      if (res.status === 200) {
+        if (socket) {
+          socket.disconnect();
+        }
+
+        toast.success("logout successful. Redirecting...", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light", // or "dark", "colored"
+          newestOnTop: true,
+          pauseOnFocusLoss: true,
+          rtl: false, // for right-to-left languages
+          icon: true, // or pass a custom icon component
+          role: "alert", // for accessibility
         });
+        // Redirect to login
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
       }
-
-      if (socket) {
-        socket.disconnect();
-      }
-
-      toast.success("logout successful. Redirecting...", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light", // or "dark", "colored"
-        newestOnTop: true,
-        pauseOnFocusLoss: true,
-        rtl: false, // for right-to-left languages
-        icon: true, // or pass a custom icon component
-        role: "alert", // for accessibility
-      });
-      // Redirect to login
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
     } catch (err) {
       console.error("Logout failed:", err);
       alert("Logout failed. Please try again.");

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./CallVideoPage.module.css";
 
 import UserList from "../../components/UserList";
@@ -6,30 +6,12 @@ import CallComponent from "../../components/CallComponent";
 import VideoCallComponent from "../../components/VideoCallComponent";
 import Socket from "../../../config/Socket";
 import { useMessageContext } from "../../store/Messages/MessageContextProvider";
-import { endCall, makeCallRequest } from "./AllCallFunctions";
 import { useContext } from "react";
 import CallerContext from "../../store/CallerContext/CallerContext";
 
 export default function CallVideoPage() {
-  const {
-    setLocalStream,
-    setPeerConnection,
-    setInCall,
-    setCallee,
-    setCallType,
-    activeUser,
-    setActiveUser,
-    mode,
-    setMode,
-    peerConnectionRef,
-    setRemoteStream,
-    callRef,
-    localStream,
-    peerConnection,
-    setIncomingCall,
-    storeSocket,
-  } = useContext(CallerContext);
-
+  const { callUser, callRef, localStreamRef, mode, activeUser, endCall } =
+    useContext(CallerContext);
   const { user, users: friendList, setUserStatuses } = useMessageContext();
   // responsive breakpoint hook
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -54,84 +36,30 @@ export default function CallVideoPage() {
         return;
       }
 
-      setActiveUser(selectUser);
-      setMode(action);
+      activeUser.current = selectUser;
 
-      // 2. **Use `action`, not `mode`**, to start the call:
-      await makeCallRequest(
-        action, // ← voice-call or video-call
-        selectUser._id,
-        socket,
-        {
-          setLocalStream,
-          setPeerConnection,
-          setInCall,
-          setCallee,
-          setCallType,
-          peerConnectionRef,
-          setRemoteStream,
-        }
-      );
-
-      // const automaticEndTheCall = setTimeout(() => {
-      //   const targetUserId = selectUser?._id;
-      //   const currentUserId = user?._id;
-
-      //   endCall({
-      //     localStream,
-      //     peerConnection,
-      //     setInCall,
-      //     setLocalStream,
-      //     setPeerConnection,
-      //     setCallee,
-      //     setCallType,
-      //     setIncomingCall,
-      //     targetUserId,
-      //     currentUserId,
-      //     storeSocket,
-      //     setActiveUser,
-      //     setMode,
-      //     callRef,
-      //   });
-      // }, 20000);
+      mode.current = action;
+      callUser(selectUser._id, action);
     });
   };
 
   const hangUp = () => {
-    const targetUserId = activeUser._id;
-    const currentUserId = user._id;
-    setMode(null);
-    setActiveUser(null);
-    endCall({
-      localStream,
-      peerConnection,
-      setInCall,
-      setLocalStream,
-      setPeerConnection,
-      setCallee,
-      setCallType,
-      setIncomingCall,
-      targetUserId,
-      currentUserId,
-      storeSocket,
-      setActiveUser,
-      setMode,
-      callRef,
-    });
+    endCall();
+    // setMode(null);/
   };
 
   return (
     <div className={styles.container}>
-      {(!isMobile || mode === null) && (
+      {callRef.current !== "callRequest" && (
         <UserList mode={"call"} onAction={handleAction} />
       )}
 
       {callRef.current === "callRequest" && (
-        <div className={isMobile ? styles.mobileFull : styles.content}>
-          {mode === "voice" ? (
-            <CallComponent onHangUp={hangUp} user={activeUser} />
+        <div className={styles.content}>
+          {mode.current === "voice" ? (
+            <CallComponent onHangUp={hangUp} />
           ) : (
-            <VideoCallComponent onHangUp={hangUp} user={activeUser} />
+            <VideoCallComponent onHangUp={hangUp} />
           )}
         </div>
       )}

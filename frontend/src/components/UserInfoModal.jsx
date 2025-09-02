@@ -55,11 +55,15 @@ const UserInfoModal = ({ user, onClose, onBack, selectedUserStatus }) => {
           ×
         </button>
         <img
-          src={user.profilePic || defaultAvatar}
-          alt={user.name}
+          src={user.avatar?.url || defaultAvatar}
+          alt={user?.name}
           className={styles.avatar}
         />
-        <h2>{user.name}</h2>
+        <h2>{user?.name}</h2>
+        <p>
+          <h3>User ID:</h3>
+          {user?.email}
+        </p>
         <p>
           Status:
           {selectedUserStatus?.isOnline
@@ -72,17 +76,17 @@ const UserInfoModal = ({ user, onClose, onBack, selectedUserStatus }) => {
                 minute: "2-digit",
                 hour12: true,
               })}`
-            : "offline"}
+            : ""}
         </p>
         <div className={styles.buttonContainer}>
-          <button className={styles.deleteOneBtn} onClick={handleDeleteForYou}>
+          {/* <button className={styles.deleteOneBtn} onClick={handleDeleteForYou}>
             🗑️ Delete for You
-          </button>
+          </button> */}
           <button
             className={styles.deleteBothBtn}
             onClick={handleDeleteForBoth}
           >
-            ❌ Delete for Both
+            ❌ Delete user
           </button>
         </div>
       </div>

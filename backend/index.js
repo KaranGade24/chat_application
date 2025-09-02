@@ -9,11 +9,12 @@ const { Server } = require("socket.io");
 const http = require("http");
 const { socketfuntion } = require("./config/socket");
 const { cloudinaryConnection } = require("./config/cloudinaryConnection");
+const path = require("path");
 
 const app = express();
 app.use(
   cors({
-    origin: "https://super-duper-capybara-vx7qrv4wv47h94p-5173.app.github.dev", // your frontend
+    origin: "*", // your frontend
     credentials: true, // allow cookies to be sent
   })
 );
@@ -21,6 +22,8 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname,"public","dist")));
 
 const server = http.createServer(app);
 
@@ -41,9 +44,9 @@ cloudinaryConnection();
 
 //routes
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the Chat Application");
-});
+// app.get("/", (req, res) => {
+//   res.send("Welcome to the Chat Application");
+// });
 
 // Authentication routes
 const authRouter = require("./router/authentication");
@@ -65,6 +68,11 @@ app.use("/chatfiles", authenticate, chatFilesRouter);
 //profile
 const profileRouter = require("./router/User");
 app.use("/profile", authenticate, profileRouter);
+
+app.get(/.*/,(req,res)=>{
+  res.sendFile(path.join(__dirname,"public","dist","index.html"));
+})
+
 
 const port = 8080;
 

@@ -24,7 +24,6 @@ function MessageContextProvider({ children }) {
 
       setUser(res.data.user);
     } catch (err) {
-      console.error("Auth error:", err?.response?.status, err?.response?.data);
       setUser(null);
       // 401 Unauthorized
       if (err?.response?.status === 401) {
@@ -48,10 +47,7 @@ function MessageContextProvider({ children }) {
 
       setFriendList(res.data.friends || []);
     } catch (err) {
-      console.error(
-        "Error fetching friends:",
-        err?.response?.data || err.message
-      );
+      setFriendList([]);
     } finally {
       setLoading(false);
     }
@@ -78,7 +74,6 @@ function MessageContextProvider({ children }) {
 
       return formatted;
     } catch (error) {
-      console.error("Error fetching messages:", error);
       return [];
     }
   };
@@ -120,7 +115,7 @@ function MessageContextProvider({ children }) {
     socket.on("user-statuses", (updatedStatuses) => {
       setUserStatuses(updatedStatuses);
     });
-  }, [window.location.href]);
+  }, []);
 
   useEffect(() => {
     const socket = Socket(user);
@@ -133,7 +128,7 @@ function MessageContextProvider({ children }) {
     socket.emit("check-user-online", friendList, (statusList) => {
       setUserStatuses(statusList);
     });
-  }, [friendList, selectedUser]);
+  }, [friendList, selectedUser, window.location.href]);
 
   //Listen add Friend
   useEffect(() => {
@@ -178,6 +173,7 @@ function MessageContextProvider({ children }) {
         userStatuses,
         setUserStatuses,
         fetchCurrentUser,
+        fetchFriendList,
       }}
     >
       {children}

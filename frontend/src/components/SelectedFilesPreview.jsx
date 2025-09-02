@@ -30,13 +30,13 @@ const SelectedFilesPreview = ({ files, onRemoveFile, loading }) => {
               {!loading && type === "image" ? (
                 <img
                   src={URL.createObjectURL(file)}
-                  alt={file.name}
+                  alt={file?.name}
                   className={styles.previewImage}
                 />
               ) : (
                 <div className={styles.genericFile}>
                   <FileText size={28} />
-                  <span className={styles.fileName}>{file.name}</span>
+                  <span className={styles.fileName}>{file?.name}</span>
                 </div>
               )}
               {loading && (

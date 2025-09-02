@@ -4,7 +4,7 @@ let socket = null;
 
 const Socket = (currentUser) => {
   if (!socket && currentUser?._id) {
-    socket = io(import.meta.env.VITE_API_URL, {
+    socket = io(`${import.meta.env.VITE_API_URL}/`, {
       transports: ["websocket"],
       query: { userId: currentUser._id },
       withCredentials: true,

@@ -1,16 +1,10 @@
-const Message = require("../model/Messages");
 const User = require("../model/User");
-const {
-  listenMakeCallSignleAndSendIncommingCallNotification,
-  listenEndCall,
-  acceptCall,
-  iceCandidate,
-} = require("./AllCallFunctions");
+const Message = require("../model/Messages");
 
+const userSocketMap = new Map();
 exports.socketfuntion = (io) => {
-  const userSocketMap = new Map();
-
   const emitAllUserStatuses = async () => {
+    console.log("status event triger");
     const users = await User.find({}).select("_id lastSeen");
     const statuses = users.map((u) => ({
       _id: u._id.toString(),
@@ -130,7 +124,7 @@ exports.socketfuntion = (io) => {
       if (userSocketId) {
         console.log({ newUser, userSocketId, userId });
         // Emit "add-user" event only to the specific user
-        io.to(userSocketId).emit("add-user", newUser); // send newUser directly
+        io.to(userSocketId).emit("new-user", newUser); // send newUser directly
       } else {
         console.log(`User with ID ${userId} not connected.`);
       }
@@ -163,33 +157,44 @@ exports.socketfuntion = (io) => {
       }
     });
 
-    //calling setup
-    socket.on("make-call", ({ receiverId, offer, mode }) => {
-      listenMakeCallSignleAndSendIncommingCallNotification(
-        receiverId,
-        offer,
-        mode,
-        socket,
-        io,
-        userSocketMap,
-        userId
-      );
+    //in backend socket.io
+    // 📞 Handle incoming call
+    //  Handle answer
+
+    socket.on("call-user", ({ offer, targetUserId, callerId, mode }) => {
+      console.log("call-user", { offer, targetUserId, callerId, mode });
+      const userSocketId = userSocketMap.get(targetUserId);
+      if (userSocketId) {
+        console.log("send incoming call", { userSocketId });
+        io.to(userSocketId).emit("incoming-call", {
+          offer,
+          callerId,
+          userId: targetUserId,
+          callMode: mode,
+        });
+      }
     });
 
-    //accept call
-    socket.on("accept-call", ({ callerId, answer, mode }) => {
-      acceptCall(io, callerId, answer, userSocketMap);
+    socket.on("call-accepted", ({ answer, to, from }) => {
+      console.log("call-accepted", { answer, to, from });
+      const userSocketId = userSocketMap.get(to);
+      io.to(userSocketId).emit("call-answered", { answer });
     });
 
-    socket.on("ice-candidate", ({ toUserId, candidate }) => {
-      iceCandidate(io, toUserId, candidate, userSocketMap, userId);
+    socket.on("ice-candidate", ({ to, from, candidate }) => {
+      const userSocketId = userSocketMap.get(to);
+      io.to(userSocketId).emit("ice-candidate", { candidate });
     });
 
     // Listen for 'call-end' event from either caller or receiver
-    socket.on("call-end", ({ to, me }) => {
-      console.log("call end");
-      listenEndCall(socket, io, to, me, userSocketMap);
+    socket.on("end-call", ({ to }) => {
+      const userSocketId = userSocketMap.get(to);
+      if (userSocketId) {
+        console.log("end-call");
+        io.to(userSocketId).emit("call-ended");
+      }
     });
+
     // 📴 Handle disconnect
     socket.on("disconnect", async () => {
       console.log("❌ Disconnected:", socket.id);
@@ -213,3 +218,5 @@ exports.socketfuntion = (io) => {
     });
   });
 };
+
+exports.userSocketMap = userSocketMap

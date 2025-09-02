@@ -1,11 +1,11 @@
-const { socketfuntion } = require("../config/socket");
+const { socketfuntion, userSocketMap } = require("../config/socket");
 const { io } = require("../index");
 const Message = require("../model/Messages");
 const User = require("../model/User");
-
 exports.addFriend = async (req, res) => {
   try {
     const { userId, friendEmail } = req.body;
+    console.log("come to add freinds");
 
     if (!userId || !friendEmail) {
       return res
@@ -41,6 +41,34 @@ exports.addFriend = async (req, res) => {
     if (alreadyFriend) {
       return res.status(400).json({ error: "Friend already added." });
     }
+    // userSocketMap
+    const userSocketId = userSocketMap.get(userId.toString());
+    const friendSocketId = userSocketMap.get(friend._id.toString());
+    console.log({ fre: friend._id.toString(), userSocketMap, friendSocketId });
+
+    console.log(
+      `add friends1 :${userId} => ${userSocketId}\n,
+      add fiend2 ${friend._id} => ${friendSocketId}\n`,
+      userSocketMap
+    );
+    if (userSocketId || friendSocketId) {
+      console.log(`add friends: ${userSocketId} 
+         ${friendSocketId}`);
+      io.to(userSocketId).emit("add-friend", {
+        friend,
+      });
+
+      io.to(friendSocketId).emit("add-friend", {
+        friend: user,
+      });
+
+      // console.log("new friend added:", { friend }, { user });
+    }
+
+    // return res.status(200).json({
+    //   message: "Friend added successfully.",
+    //   friend,
+    // });
 
     // 5. Add each other
     user.friends.push(friend._id);
@@ -160,6 +188,19 @@ exports.deleteFriendForBoth = async (req, res) => {
       "friends",
       "name email avatar isOnline lastSeen"
     );
+
+    console.log(`deleted from both side currentuserID: ${currentUserId}=> ${userSocketMap.get(
+      currentUserId
+    )}
+    targetUserId: ${targetUserId} => ${userSocketMap.get(targetUserId)}`);
+
+    io.to(userSocketMap.get(currentUserId)).emit("delete-friend", {
+      currentUserId: currentUserId,
+    });
+    io.to(userSocketMap.get(targetUserId)).emit("delete-friend", {
+      currentUserId: targetUserId,
+    });
+
     console.log("updatedUser:", updatedUser);
     return res.status(200).json({
       message: "Friend deleted from both users.",

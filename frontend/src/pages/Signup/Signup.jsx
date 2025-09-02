@@ -8,7 +8,6 @@ import MessageContext from "../../store/Messages/MessageContext";
 import { FaSpinner } from "react-icons/fa";
 
 const Signup = () => {
-  const { setLoading, loading } = useContext(MessageContext);
   const navigate = useNavigate();
   const name = useRef("");
   const email = useRef("");
@@ -19,6 +18,7 @@ const Signup = () => {
   useEffect(() => {
     setLoading(false);
   }, []);
+  const [loading, setLoading] = useState(false);
 
   const onSignup = async (user) => {
     try {
@@ -194,12 +194,6 @@ const Signup = () => {
     const passwordVal = password.current.value?.trim();
     const otpVal = otp.current.value?.trim();
 
-    console.log({
-      nameVal,
-      emailVal,
-      passwordVal,
-      otpVal,
-    });
     // Step 1: Request OTP
     if (nameVal && emailVal && otpVal === "" && passwordVal === "") {
       handleGetOtp(emailVal);

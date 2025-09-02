@@ -5,56 +5,31 @@ import SideBar from "./components/SideBar";
 import { useContext, useEffect, useState } from "react";
 import MessageContext from "./store/Messages/MessageContext";
 import FullPageLoader from "./components/FullPageLoader";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import IncomingCallModal from "./components/IncomingCallModal";
-import {
-  acceptCallRequest,
-  endCall,
-} from "./pages/CallVideoPage/AllCallFunctions";
 import CallerContext from "./store/CallerContext/CallerContext";
 import Socket from "../config/Socket";
 import AfterAcceptingCall from "./components/AfterAcceptingCall";
 import senderCallRing from "./assets/senderCallRing.mp3";
 import receiverCallRing from "./assets/receiverCallRing.mp3";
-import { FaSpinner } from "react-icons/fa";
+import CallVideoPage from "./pages/CallVideoPage/CallVideoPage";
 
 function App() {
   const {
     loading,
     user: currentUser,
     users,
-    fetchCurrentUser,
     setUsers,
-  } = useContext(MessageContext); // or any global loading logic
-  const {
-    incomingCall,
-    setIncomingCall,
-    serIsCurrectUser,
-    localStream,
-    peerConnection,
-    setInCall,
-    setLocalStream,
-    setPeerConnection,
-    setCallee,
-    setCallType,
-    targetUserId,
-    storeSocket,
-    setActiveUser,
-    setMode,
-    setRemoteStream,
-    setCaller,
-    inCall,
-    remoteStream,
-    mode,
-    peerConnectionRef,
-    pendingCandidatesRef,
-    callRef,
-  } = useContext(CallerContext);
+    setUserStatuses,
+    userStatuses,
+    fetchFriendList,
+  } = useContext(MessageContext);
   const navigate = useNavigate();
-  const [localLoading, setLocalLoading] = useState(false);
+
+  const { callRef, answerCall, callState, mode, endCall, callInfo } =
+    useContext(CallerContext);
 
   useEffect(() => {
-    serIsCurrectUser(currentUser);
     if (loading) {
       return; // Prevent navigation while loading
     }
@@ -66,88 +41,114 @@ function App() {
 
   useEffect(() => {
     if (!currentUser) return;
+    const socket = Socket(currentUser);
 
+    if (!socket) return;
+    if (!users || users.length === 0) return;
+
+    socket.on("add-friend", (newUser) => {
+      console.log("new user:", newUser);
+      // alert("new user added");
+      const user = users.find((u) => u._id === newUser._id);
+      const currUser = currentUser._id === newUser._id ? true : false;
+
+      if (user || currUser) return;
+      // console.log({ currentUser });
+
+      toast.success(`${newUser.name} is now your friend!`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light", // or "dark", "colored"
+        newestOnTop: true,
+        pauseOnFocusLoss: true,
+        rtl: false, // for right-to-left languages
+        icon: true, // or pass a custom icon component
+        role: "alert", // for accessibility
+      });
+      setTimeout(() => {
+        fetchFriendList(currentUser._id);
+      }, 2000);
+      // return;
+      // setUsers((prev) => [newUser, ...prev]);
+
+      console.log("new user is set", { users, newUser });
+    });
+
+    let timeOutForFetchFriends = null;
+    socket.on("delete-friend", async (userId) => {
+      console.log("delete friend:");
+
+      timeOutForFetchFriends = setTimeout(async () => {
+        await fetchFriendList(currentUser._id);
+      }, 2500);
+
+      toast.success(`Friend removed`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    });
+
+    return () => {
+      if (timeOutForFetchFriends) {
+        clearTimeout(timeOutForFetchFriends);
+      }
+      socket.off("add-friend");
+      socket.off("delete-friend");
+    };
+  }, [currentUser, users]);
+
+  useEffect(() => {
     const socket = Socket(currentUser);
 
     if (!socket) return;
 
     if (!users || users.length === 0) return;
 
-    const handleAddUser = (newUser) => {
-      const exists = users.some((u) => u._id === newUser._id);
-      if (!exists) {
-        if (newUser._id !== currentUser._id) {
-          setUsers((prev) => [...prev, newUser]);
-        }
-      }
-    };
-    socket.on("add-user", handleAddUser);
-
-    return () => {
-      socket.off("add-user");
-    };
-  }, [currentUser, users]);
-
-  const onReject = () => {
-    endCall({
-      localStream,
-      peerConnection,
-      setInCall,
-      setLocalStream,
-      setPeerConnection,
-      setCallee,
-      setCallType,
-      setIncomingCall,
-      targetUserId,
-      currentUserId: currentUser._id,
-      storeSocket,
-      setActiveUser,
-      setMode,
-      callRef,
+    // Trigger a status check manually (on mount or user change)
+    socket.emit("check-user-online", users, (statusList) => {
+      setUserStatuses(statusList);
     });
-  };
+  }, [users, window.location.href]);
 
-  const onAccept = (incomingCall) => {
-    acceptCallRequest(
-      {
-        mode: incomingCall.mode,
-        callerId: incomingCall.callerId,
-        offer: incomingCall.offer,
-      },
-      storeSocket,
-      {
-        setLocalStream,
-        setRemoteStream,
-        setPeerConnection,
-        setInCall,
-        setCallee,
-        setCallType,
-        peerConnectionRef,
-        setIncomingCall,
-        pendingCandidatesRef,
-        callRef,
-      }
-    );
-  };
   useEffect(() => {
-    const socket = Socket(currentUser);
+    if (!currentUser) return;
 
-    if (!socket) return;
+    let socket = Socket(currentUser);
 
-    socket.on("call-end", ({ from }) => {});
-  }, []);
+    if (!socket) {
+      socket = Socket(currentUser);
+    }
+
+    socket.on("user-statuses", (updatedStatuses) => {
+      setUserStatuses(updatedStatuses);
+    });
+  }, [currentUser]);
 
   return (
     <div className="app">
       {(callRef.current === "incomingCall" ||
-        callRef.current === "callRequest") && (
+        callRef.current === "callRequest" ||
+        callState === "incomingCall" ||
+        callState === "callRequest") && (
         <audio
           loop={true}
           autoPlay={true}
           src={
-            callRef.current === "callRequest"
+            callRef.current === "callRequest" || callState === "callRequest"
               ? senderCallRing
-              : callRef.current === "incomingCall"
+              : callRef.current === "incomingCall" ||
+                callState === "incomingCall"
               ? receiverCallRing
               : ""
           }
@@ -165,26 +166,28 @@ function App() {
             <Outlet />
           </div>
 
-          {callRef.current === "callAccepted" && (
-            <AfterAcceptingCall
-              localStream={localStream}
-              mode={mode}
-              onEnd={onReject}
-              remoteStream={remoteStream}
-              user={users.find((u) => u._id == incomingCall?.callerId) || "a"}
-            />
+          {(callState === "callRequest" ||
+            callRef.current === "callRequest") && <CallVideoPage />}
+
+          {(callState === "callAccepted" ||
+            callRef.current === "callAccepted") && (
+            <AfterAcceptingCall mode={mode.current} />
           )}
-          {callRef.current === "incomingCall" && (
+
+          {(callState === "incomingCall" ||
+            callRef.current === "incomingCall") && (
             <IncomingCallModal
+              onAccept={() => {
+                answerCall();
+              }}
+              endCall={() => {
+                endCall();
+              }}
               caller={
-                users.find((u) => u._id === incomingCall.callerId) || {
+                users.find((u) => u._id === callInfo.current.from) || {
                   name: "Unknown",
                 }
               }
-              onReject={onReject}
-              onAccept={() => {
-                onAccept(incomingCall);
-              }}
             />
           )}
         </>

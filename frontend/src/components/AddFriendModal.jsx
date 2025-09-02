@@ -7,27 +7,9 @@ import Socket from "../../config/Socket";
 
 const AddFriendModal = ({ user, onClose }) => {
   const [email, setEmail] = useState("");
-  const { setUsers, users, selectedUser } = useMessageContext();
+  const { setUsers, users, selectedUser, fetchFriendList } =
+    useMessageContext();
   const socket = Socket(user);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleAddUser = (newUser) => {
-      const exists = users.some((u) => u._id === newUser._id);
-      if (!exists) {
-        if (newUser._id !== user._id) {
-          setUsers((prev) => [...prev, newUser]);
-        }
-      }
-    };
-
-    socket.on("add-user", handleAddUser);
-
-    return () => {
-      socket.off("add-user", handleAddUser);
-    };
-  }, [socket, users, selectedUser, setUsers]);
 
   const handleSubmit = async () => {
     try {
@@ -42,15 +24,9 @@ const AddFriendModal = ({ user, onClose }) => {
         { withCredentials: true }
       );
 
-      if (response.status === 200) {
-      }
-      socket.emit("add-user", {
-        newUser: response.data.friend,
-        userId: response.data.friend._id,
-      });
-      toast.success("Friend added successfully!", {
+      toast.success(`New friend added successfully!`, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -63,7 +39,38 @@ const AddFriendModal = ({ user, onClose }) => {
         icon: true, // or pass a custom icon component
         role: "alert", // for accessibility
       });
-      setUsers((prev) => [response.data.friend, ...prev]);
+      setTimeout(() => {
+        fetchFriendList(user._id);
+      }, 2000);
+      // if (response.status === 200) {
+      // }
+      // console.log("new user:", { newUser: response.data.friend });
+      // socket.emit("add-user", {
+      //   newUser: response.data.friend,
+      //   userId: response.data.friend._id,
+      // });
+
+      // console.log({ users });
+      // const isFriend = users.map((f) => {
+      //   return f._id === response.data.friend._id;
+      // });
+      // if (isFriend.length >= 0) {
+      //   return toast.info("You are already friends with this user!", {
+      //     position: "top-right",
+      //     autoClose: 3000,
+      //     hideProgressBar: false,
+      //     closeOnClick: true,
+      //     pauseOnHover: true,
+      //     draggable: true,
+      //     progress: undefined,
+      //     theme: "light", // or "dark", "colored"
+      //     newestOnTop: true,
+      //     pauseOnFocusLoss: true,
+      //     rtl: false,
+      //   });
+      // }
+      // setUsers((prev) => [response.data.friend, ...prev]);
+
       onClose(); // Close the modal
     } catch (error) {
       toast.error(
@@ -85,13 +92,14 @@ const AddFriendModal = ({ user, onClose }) => {
           role: "alert", // for accessibility
         }
       );
+      console.log({ error });
     }
   };
 
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <h3 className={styles.title}>Add Friend for {user.name}</h3>
+        <h3 className={styles.title}>Add Friend for {user?.name}</h3>
         <input
           type="email"
           placeholder="Enter friend's email"

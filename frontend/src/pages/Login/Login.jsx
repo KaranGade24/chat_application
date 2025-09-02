@@ -8,8 +8,9 @@ import { LoaderCircle } from "lucide-react";
 import { FaSpinner } from "react-icons/fa";
 
 const Login = () => {
-  const { setUser, setLoading, loading } = useContext(MessageContext); // Assuming you have a context to set the user
+  const { setUser } = useContext(MessageContext); // Assuming you have a context to set the user
   const navigate = useNavigate();
+  const [loading, setLoading] = React.useState(false);
 
   const onLogin = async (user) => {
     try {

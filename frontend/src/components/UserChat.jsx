@@ -223,7 +223,7 @@ export default function UserChat({
     for (const file of files) {
       if (file.size > maxSizeInBytes) {
         alert(
-          `File "${file.name}" exceeds the 10MB limit and will be skipped.`
+          `File "${file?.name}" exceeds the 10MB limit and will be skipped.`
         );
       } else {
         validFiles.push(file);
@@ -347,15 +347,15 @@ export default function UserChat({
               </button>
             )}
             <img
-              src={selectedUser.profilePic || defaultAvatar}
-              alt={selectedUser.name}
+              src={selectedUser.avatar?.url || defaultAvatar}
+              alt={selectedUser?.name}
               className={styles.profilePic}
             />
             <div className={styles.userInfo}>
-              <h3>{selectedUser.name}</h3>
+              <h3>{selectedUser?.name}</h3>
               <span className={styles.status}>
                 {selectedUserStatus?.isOnline
-                  ? "online"
+                  ? ""
                   : selectedUserStatus?.lastSeen
                   ? `last seen: ${new Date(
                       selectedUserStatus.lastSeen
@@ -364,8 +364,7 @@ export default function UserChat({
                       minute: "2-digit",
                       hour12: true,
                     })}`
-                  : "offline"}
-                `
+                  : ""}
               </span>
               {isTyping && (
                 <div className={styles.typingIndicator}>Typing...</div>
