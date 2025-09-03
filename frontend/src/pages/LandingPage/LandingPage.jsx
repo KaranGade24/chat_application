@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styles from "./LandingPage.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className={styles.landingWrapper}>
       {/* Header with Logo and Auth Buttons */}
@@ -174,7 +176,13 @@ const LandingPage = () => {
           <div className={styles.heroActions}>
             <NavLink
               style={{ background: "none", borderRadius: "20%" }}
-              to="/app/chat"
+              onClick={(e) => {
+                e.preventDefault();
+                if (!localStorage.getItem("user")) {
+                  navigate("/login");
+                }
+                navigate("/app");
+              }}
             >
               <button className={styles.primaryCta}>Start Chatting</button>
             </NavLink>
@@ -303,7 +311,16 @@ const LandingPage = () => {
             Join millions of users who trust ChatFlow for their daily
             communication needs.
           </p>
-          <NavLink to="/app/chat" className={styles.ctaButton}>
+          <NavLink
+            onClick={(e) => {
+              e.preventDefault();
+              if (!localStorage.getItem("user")) {
+                navigate("/login");
+              }
+              navigate("/app");
+            }}
+            className={styles.ctaButton}
+          >
             Get Started Free
           </NavLink>
         </div>

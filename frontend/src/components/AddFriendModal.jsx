@@ -10,11 +10,13 @@ const AddFriendModal = ({ user, onClose }) => {
   const { setUsers, users, selectedUser, fetchFriendList } =
     useMessageContext();
   const socket = Socket(user);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     try {
       if (!email) return;
 
+      setLoading(true);
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/friends/add`,
         {
@@ -42,34 +44,6 @@ const AddFriendModal = ({ user, onClose }) => {
       setTimeout(() => {
         fetchFriendList(user._id);
       }, 2000);
-      // if (response.status === 200) {
-      // }
-      // console.log("new user:", { newUser: response.data.friend });
-      // socket.emit("add-user", {
-      //   newUser: response.data.friend,
-      //   userId: response.data.friend._id,
-      // });
-
-      // console.log({ users });
-      // const isFriend = users.map((f) => {
-      //   return f._id === response.data.friend._id;
-      // });
-      // if (isFriend.length >= 0) {
-      //   return toast.info("You are already friends with this user!", {
-      //     position: "top-right",
-      //     autoClose: 3000,
-      //     hideProgressBar: false,
-      //     closeOnClick: true,
-      //     pauseOnHover: true,
-      //     draggable: true,
-      //     progress: undefined,
-      //     theme: "light", // or "dark", "colored"
-      //     newestOnTop: true,
-      //     pauseOnFocusLoss: true,
-      //     rtl: false,
-      //   });
-      // }
-      // setUsers((prev) => [response.data.friend, ...prev]);
 
       onClose(); // Close the modal
     } catch (error) {
@@ -93,6 +67,8 @@ const AddFriendModal = ({ user, onClose }) => {
         }
       );
       console.log({ error });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,8 +87,12 @@ const AddFriendModal = ({ user, onClose }) => {
           <button onClick={onClose} className={styles.cancelBtn}>
             Cancel
           </button>
-          <button onClick={handleSubmit} className={styles.addBtn}>
-            Add Friend
+          <button
+            disabled={loading}
+            onClick={handleSubmit}
+            className={styles.addBtn}
+          >
+            {loading ? "Adding Friend..." : "Add Friend"}
           </button>
         </div>
       </div>
