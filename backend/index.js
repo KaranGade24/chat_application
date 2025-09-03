@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname,"public","dist")));
+app.use(express.static(path.join(__dirname, "public", "dist")));
 
 const server = http.createServer(app);
 
@@ -45,7 +45,7 @@ cloudinaryConnection();
 //routes
 
 // app.get("/", (req, res) => {
-//   res.send("Welcome to the Chat Application");
+//   res.send("<h1>Welcome to the Chat Application</h1>");
 // });
 
 // Authentication routes
@@ -69,11 +69,11 @@ app.use("/chatfiles", authenticate, chatFilesRouter);
 const profileRouter = require("./router/User");
 app.use("/profile", authenticate, profileRouter);
 
-app.get(/.*/,(req,res)=>{
-  res.sendFile(path.join(__dirname,"public","dist","index.html"));
-})
-console.log(path.join(__dirname,"public","dist","index.html"))
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
+});
 
+console.log(path.join(__dirname, "public", "dist", "index.html"));
 
 const port = 8080;
 

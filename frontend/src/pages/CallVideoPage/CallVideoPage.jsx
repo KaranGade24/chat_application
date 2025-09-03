@@ -36,7 +36,13 @@ export default function CallVideoPage() {
         return;
       }
 
-      activeUser.current = selectUser;
+      activeUser.current = [selectUser];
+      console.log(
+        "activeUser: ",
+        activeUser.current,
+        "selected User : ",
+        selectUser
+      );
 
       mode.current = action;
       callUser(selectUser._id, action);

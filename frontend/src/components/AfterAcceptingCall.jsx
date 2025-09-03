@@ -18,17 +18,12 @@ const AfterAcceptingCall = ({
   const [callTime, setCallTime] = useState(0);
   const { localStreamRef, remoteStreamRef, endCall, activeUser } =
     useContext(CallerContext);
-  const activeUserRef = useRef(activeUser.current);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const audioRef = useRef(null);
 
   const { user } = useContext(MessageContext);
   const isVideoCall = mode === "video" ? true : false;
-
-  useEffect(() => {
-    activeUserRef.current = activeUser.current;
-  }, [activeUser, activeUser.current]);
 
   useEffect(() => {
     if (mode !== "video") return;
@@ -133,7 +128,7 @@ const AfterAcceptingCall = ({
       <div className={styles.overlay}>
         <div className={styles.userInfo}>
           <FiUser className={styles.userIcon} />
-          <h2>{activeUser?.current?.name || "Unknown"}</h2>
+          <h2>{activeUser?.current[0]?.name || "Unknown"}</h2>
           <div className={styles.callDuration}>
             <FiClock />
             <span>{formatTime(callTime)}</span>

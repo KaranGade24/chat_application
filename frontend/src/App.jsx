@@ -2,7 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Header";
 import SideBar from "./components/SideBar";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import MessageContext from "./store/Messages/MessageContext";
 import FullPageLoader from "./components/FullPageLoader";
 import { toast, ToastContainer } from "react-toastify";
@@ -19,15 +19,20 @@ function App() {
     loading,
     user: currentUser,
     users,
-    setUsers,
     setUserStatuses,
-    userStatuses,
     fetchFriendList,
   } = useContext(MessageContext);
   const navigate = useNavigate();
 
-  const { callRef, answerCall, callState, mode, endCall, callInfo } =
-    useContext(CallerContext);
+  const {
+    callRef,
+    answerCall,
+    callState,
+    mode,
+    endCall,
+    callInfo,
+    activeUser,
+  } = useContext(CallerContext);
 
   useEffect(() => {
     if (loading) {
@@ -48,12 +53,12 @@ function App() {
 
     socket.on("add-friend", (newUser) => {
       console.log("new user:", newUser);
-      // alert("new user added");
-      const user = users.find((u) => u._id === newUser._id);
-      const currUser = currentUser._id === newUser._id ? true : false;
+      // // alert("new user added");
+      // const user = users.find((u) => u._id === newUser._id);
+      // const currUser = currentUser._id === newUser._id ? true : false;
 
-      if (user || currUser) return;
-      // console.log({ currentUser });
+      // if (user || currUser) return;
+      // // console.log({ currentUser });
 
       toast.success(`${newUser.name} is now your friend!`, {
         position: "top-right",
@@ -72,7 +77,7 @@ function App() {
       });
       setTimeout(() => {
         fetchFriendList(currentUser._id);
-      }, 2000);
+      }, 1000);
       // return;
       // setUsers((prev) => [newUser, ...prev]);
 
@@ -85,7 +90,7 @@ function App() {
 
       timeOutForFetchFriends = setTimeout(async () => {
         await fetchFriendList(currentUser._id);
-      }, 2500);
+      }, 1000);
 
       toast.success(`Friend removed`, {
         position: "top-right",
@@ -135,6 +140,11 @@ function App() {
     });
   }, [currentUser]);
 
+  useEffect(() => {
+    if (callRef.current === "incomingCall" || callState === "incomingCall") {
+      activeUser.current = users.filter((u) => u._id === callInfo.current.from);
+    }
+  }, [callRef.current, users]);
   return (
     <div className="app">
       {(callRef.current === "incomingCall" ||

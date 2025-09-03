@@ -3,9 +3,11 @@ import UserList from "../../components/UserList";
 import UserChat from "../../components/UserChat";
 import styles from "./Chat.module.css";
 import MessageContext from "../../store/Messages/MessageContext";
+import CallerContext from "../../store/CallerContext/CallerContext";
 
 function Chat() {
   const { selectedUser, setSelectedUser } = useContext(MessageContext);
+  const { activeUser } = useContext(CallerContext);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showChatOnly, setShowChatOnly] = useState(false);
   const [isUserChatVisible] = useState(false);

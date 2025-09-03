@@ -51,19 +51,6 @@ exports.addFriend = async (req, res) => {
       add fiend2 ${friend._id} => ${friendSocketId}\n`,
       userSocketMap
     );
-    if (userSocketId || friendSocketId) {
-      console.log(`add friends: ${userSocketId} 
-         ${friendSocketId}`);
-      io.to(userSocketId).emit("add-friend", {
-        friend,
-      });
-
-      io.to(friendSocketId).emit("add-friend", {
-        friend: user,
-      });
-
-      // console.log("new friend added:", { friend }, { user });
-    }
 
     // return res.status(200).json({
     //   message: "Friend added successfully.",
@@ -78,6 +65,20 @@ exports.addFriend = async (req, res) => {
     await friend.save();
 
     console.log("Friend added successfully:", friend);
+
+    if (userSocketId || friendSocketId) {
+      console.log(`add friends: ${userSocketId} 
+         ${friendSocketId}`);
+      io.to(userSocketId).emit("add-friend", {
+        friend,
+      });
+
+      io.to(friendSocketId).emit("add-friend", {
+        friend: user,
+      });
+
+      // console.log("new friend added:", { friend }, { user });
+    }
 
     res.status(200).json({
       message: "Friend added successfully.",

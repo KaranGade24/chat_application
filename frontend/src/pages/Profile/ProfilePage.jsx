@@ -159,8 +159,13 @@ const ProfilePage = () => {
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.avatarWrapper}>
-            {form.avatar ? (
-              <img src={form.avatar} alt="Avatar" className={styles.avatar} />
+            {form?.avatar ? (
+              <img
+                src={form?.avatar}
+                alt="Avatar"
+                className={styles.avatar}
+                onError={(e) => (e.target.src = form?.avatar)}
+              />
             ) : (
               <FaUser className={styles.avatarIcon} />
             )}
