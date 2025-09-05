@@ -66,7 +66,6 @@ const AddFriendModal = ({ user, onClose }) => {
           role: "alert", // for accessibility
         }
       );
-      console.log({ error });
     } finally {
       setLoading(false);
     }

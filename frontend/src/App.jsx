@@ -52,13 +52,11 @@ function App() {
     if (!users || users.length === 0) return;
 
     socket.on("add-friend", (newUser) => {
-      console.log("new user:", newUser);
       // // alert("new user added");
       // const user = users.find((u) => u._id === newUser._id);
       // const currUser = currentUser._id === newUser._id ? true : false;
 
       // if (user || currUser) return;
-      // // console.log({ currentUser });
 
       toast.success(`${newUser.name} is now your friend!`, {
         position: "top-right",
@@ -80,14 +78,10 @@ function App() {
       }, 1000);
       // return;
       // setUsers((prev) => [newUser, ...prev]);
-
-      console.log("new user is set", { users, newUser });
     });
 
     let timeOutForFetchFriends = null;
     socket.on("delete-friend", async (userId) => {
-      console.log("delete friend:");
-
       timeOutForFetchFriends = setTimeout(async () => {
         await fetchFriendList(currentUser._id);
       }, 1000);
