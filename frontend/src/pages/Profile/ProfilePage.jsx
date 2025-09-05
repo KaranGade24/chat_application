@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import styles from "./ProfilePage.module.css";
-import { FaEnvelope, FaUser, FaLock, FaCamera } from "react-icons/fa";
+import { FaEnvelope, FaUser, FaCamera } from "react-icons/fa";
 import MessageContext from "../../store/Messages/MessageContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

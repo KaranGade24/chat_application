@@ -26,7 +26,7 @@ function SearchBar() {
     <div className={styles.searchContainer}>
       {/* Conditionally render search bar */}
 
-      {(isMobile && !selectedUser) || !isMobile ? (
+      {/* {(isMobile && !selectedUser) || !isMobile ? (
         <div className={styles.searchBar}>
           <FaSearch className={styles.icon} />
           <input
@@ -36,7 +36,7 @@ function SearchBar() {
             aria-label="Search"
           />
         </div>
-      ) : null}
+      ) : null} */}
 
       {/* Profile info */}
       <div className={styles.profile}>

@@ -4,7 +4,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useRef, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import MessageContext from "../../store/Messages/MessageContext";
 import { FaSpinner } from "react-icons/fa";
 
 const Signup = () => {
@@ -51,7 +50,7 @@ const Signup = () => {
           role: "alert", // for accessibility
         });
         localStorage.setItem("user", JSON.stringify(doc));
-        navigate("/app");
+        navigate("/login");
       }
     } catch (err) {
       console.error("Signup failed:", err);

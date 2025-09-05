@@ -2,7 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Header";
 import SideBar from "./components/SideBar";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect } from "react";
 import MessageContext from "./store/Messages/MessageContext";
 import FullPageLoader from "./components/FullPageLoader";
 import { toast, ToastContainer } from "react-toastify";
@@ -49,7 +49,7 @@ function App() {
     const socket = Socket(currentUser);
 
     if (!socket) return;
-    if (!users || users.length === 0) return;
+    // if (!users || users.length === 0) return;
 
     socket.on("add-friend", (newUser) => {
       // // alert("new user added");
@@ -75,7 +75,7 @@ function App() {
       });
       setTimeout(() => {
         fetchFriendList(currentUser._id);
-      }, 1000);
+      }, 500);
       // return;
       // setUsers((prev) => [newUser, ...prev]);
     });
@@ -84,7 +84,7 @@ function App() {
     socket.on("delete-friend", async (userId) => {
       timeOutForFetchFriends = setTimeout(async () => {
         await fetchFriendList(currentUser._id);
-      }, 1000);
+      }, 500);
 
       toast.success(`Friend removed`, {
         position: "top-right",
