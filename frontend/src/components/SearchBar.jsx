@@ -24,19 +24,7 @@ function SearchBar() {
 
   return (
     <div className={styles.searchContainer}>
-      {/* Conditionally render search bar */}
-
-      {/* {(isMobile && !selectedUser) || !isMobile ? (
-        <div className={styles.searchBar}>
-          <FaSearch className={styles.icon} />
-          <input
-            type="text"
-            placeholder="Search..."
-            className={styles.input}
-            aria-label="Search"
-          />
-        </div>
-      ) : null} */}
+      
 
       {/* Profile info */}
       <div className={styles.profile}>

@@ -9,7 +9,7 @@ import Socket from "../../config/Socket";
 import { useMessageContext } from "../store/Messages/MessageContextProvider";
 import { ClipLoader } from "react-spinners";
 import UserInfoModal from "./UserInfoModal";
-import { FileUpIcon } from "lucide-react";
+import { ArrowLeft, FileUpIcon } from "lucide-react";
 import axios from "axios";
 import SelectedFilesPreview from "./SelectedFilesPreview";
 
@@ -337,14 +337,14 @@ export default function UserChat({
           >
             {onBack && (
               <button
-                className={styles.backBtn}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onBack();
-                }}
-              >
-                ← Back
-              </button>
+              className={styles.backBtn}
+              onClick={(e) => {
+                e.preventDefault();
+                onBack();
+              }}
+            >
+              <ArrowLeft size={18} strokeWidth={2.2} />
+            </button>
             )}
             <img
               src={selectedUser.avatar?.url || defaultAvatar}

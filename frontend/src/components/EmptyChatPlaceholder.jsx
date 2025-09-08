@@ -14,7 +14,7 @@ function EmptyChatPlaceholder() {
         >
           <path
             d="M4 4H20C21.1046 4 22 4.89543 22 6V15C22 16.1046 21.1046 17 20 17H7L4 20V6C4 4.89543 4.89543 4 6 4Z"
-            stroke="#999"
+            // stroke="#999"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -1,4 +1,4 @@
-.sidebar a:hover {
+/* .sidebar a:hover {
   height: fit-content;
   width: 100%;
   cursor: pointer;
@@ -57,4 +57,132 @@
   .mainContainer {
     width: 45px;
   }
+} */
+
+
+/* Sidebar container */
+.sidebar {
+  height: 100vh;
+  background-color: hsl(218.57deg 100% 10.98%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  transition: width 0.3s ease;
+  overflow: hidden;
 }
+
+/* Open vs Closed */
+.open {
+  width: 250px;
+}
+.closed {
+  width: 85px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+}
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo {
+  cursor: pointer;
+}
+.logoText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.toggleBtn {
+  background: none;
+  border: none;
+  color: #b0b8c1;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.toggleBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Menu */
+.menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /*center horizontally */
+  gap: 5px;
+  margin-top: 20px;
+  flex-grow: 1;
+}
+.menuItem {
+  display: flex;
+  gap: 15px;
+  color: #b0b8c1;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  width: 90%; /* keep centered nicely */
+}
+
+.menuItem:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+.isActive {
+  background-color: hsl(216.2deg 100% 36.08%);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Profile */
+.profileSection {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* center horizontally */
+  gap: 12px;
+  padding: 15px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+.profileImg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid hsl(216.2deg 100% 36.08%);
+}
+.profileName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+.profileStatus {
+  font-size: 12px;
+  color: #5ed38a;
+  margin: 0;
+}
+
+.closedMenuItemIcon svg {
+  margin: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .open {
+    width: 220px;
+  }
+}
+

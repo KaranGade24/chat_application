@@ -1,35 +1,74 @@
+/* EmptyStatePage.module.css */
+
+/* ---------- CONTAINER ---------- */
 .container {
-    margin-top:20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
   text-align: center;
-  color: #4a5568;
-  padding: 1rem;
-  background: linear-gradient(135deg, #f7fafc, #edf2f7);
+  padding: 2rem;
+  background-color: hsl(219.13deg 100% 9.02%); /* overall dark-blue theme */
+  color: white;
+  gap: 1.5rem;
 }
 
+/* ---------- ILLUSTRATION ---------- */
 .illustration {
-  opacity: 0.7;
-  margin-bottom: 1rem;
-  transition: transform 0.3s ease;
+  width: 200px;
+  height: 200px;
+  stroke: hsl(210.61deg 100% 48.04%); /* main accent blue */
+  stroke-width: 4;
+  fill: none;
+  transition: transform 0.3s ease, stroke 0.3s ease;
 }
 
 .illustration:hover {
   transform: scale(1.05);
+  stroke: hsl(216.52deg 100% 27.06%); /* hover accent */
 }
 
+.illustration circle {
+  stroke:  hsl(216.59deg 100% 45%); /* subtle inner stroke */
+}
+
+/* ---------- TITLE ---------- */
 .title {
-  font-size: 1.5rem;
-  margin: 0.5rem 0;
-  color: #2d3748;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  color:  hsl(216.59deg 100% 45%); /* bright accent for title */
 }
 
+/* Gradient text example if needed */
+.gradientText {
+  background: linear-gradient(90deg, hsl(216.06deg 94.42% 42.16%), hsl(216.92deg 72.22% 14.12%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------- MESSAGE ---------- */
 .message {
   font-size: 1rem;
-  color: #718096;
+  color: hsl(218.71deg 81.12% 42.69%); /* slightly muted blue-gray */
+  max-width: 300px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .illustration {
+    width: 150px;
+    height: 150px;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .message {
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -37,27 +76,10 @@
     width: 120px;
     height: 120px;
   }
-
   .title {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
   }
-
   .message {
     font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 320px) {
-  .illustration {
-    width: 100px;
-    height: 100px;
-  }
-
-  .title {
-    font-size: 1rem;
-  }
-
-  .message {
-    font-size: 0.8rem;
   }
 }

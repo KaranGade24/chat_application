@@ -233,7 +233,7 @@ const Signup = () => {
     <div className={styles.signupWrapper}>
       <ToastContainer position="top-right" autoClose={3000} />
       <div className={styles.signupCard}>
-        <h2 className={styles.title}>Create Account 🚀</h2>
+        <h2 className={styles.title}>Create Account</h2>
         <p className={styles.subtitle}>Join the chat and start talking</p>
         <form onSubmit={handleSignup} className={styles.form}>
           <input

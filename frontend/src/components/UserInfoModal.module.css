@@ -1,3 +1,4 @@
+/* -------- OVERLAY -------- */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -5,7 +6,7 @@
   width: 100%;
   height: 100%;
   backdrop-filter: blur(6px);
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,104 +14,133 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
+/* -------- MODAL -------- */
 .modal {
-  background: linear-gradient(to bottom right, #ffffff, #f4f6f8);
+  background: linear-gradient(
+    to bottom right,
+    hsl(218, 100%, 12%),
+    hsl(218, 100%, 8%)
+  );
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  position: relative;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
   width: 90%;
   max-width: 420px;
+  text-align: center;
+  position: relative;
   animation: slideUp 0.4s ease;
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid hsl(218, 100%, 18%);
 }
 
+/* -------- AVATAR -------- */
 .avatar {
   width: 110px;
   height: 110px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #4a90e2;
+  border: 4px solid hsl(210, 100%, 48%);
   margin-bottom: 1rem;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .avatar:hover {
   transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(74, 144, 226, 0.6);
 }
 
+/* -------- TEXT -------- */
 h2 {
   font-size: 1.6rem;
   margin: 0.5rem 0;
-  color: #333;
+  color: #fff;
+  font-weight: 600;
 }
 
 p {
   font-size: 1rem;
-  color: #666;
+  color: hsl(220, 10%, 70%);
   margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
+/* -------- CLOSE BUTTON -------- */
 .closeBtn {
   position: absolute;
-  top: 10px;
+  top: 12px;
   right: 15px;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   background: transparent;
   border: none;
-  color: #888;
+  color: hsl(220, 10%, 65%);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.25s ease, transform 0.25s ease;
 }
 
 .closeBtn:hover {
-  color: #ff4d4f;
+  color: hsl(0, 85%, 60%);
+  transform: rotate(90deg);
 }
 
+.closeBtn:focus {
+  outline: 2px solid hsl(210, 100%, 48%);
+  border-radius: 50%;
+}
+
+/* -------- BUTTON WRAPPER -------- */
 .buttonContainer {
   display: flex;
+  justify-content: center;
   gap: 1rem;
   margin-top: 1.5rem;
-  justify-content: center;
+  flex-wrap: wrap;
 }
 
+/* -------- BUTTONS (shared styles) -------- */
+.deleteOneBtn,
+.deleteBothBtn {
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.75rem;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* warning (amber) */
 .deleteOneBtn {
   background-color: #ffa940;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s;
 }
 
 .deleteOneBtn:hover {
   background-color: #fa8c16;
+  transform: translateY(-2px);
 }
 
+/* danger (red) */
 .deleteBothBtn {
   background-color: #ff4d4f;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s;
 }
 
 .deleteBothBtn:hover {
   background-color: #cf1322;
+  transform: translateY(-2px);
 }
 
+/* pressed state */
+.deleteOneBtn:active,
+.deleteBothBtn:active {
+  transform: scale(0.96);
+}
+
+/* -------- ANIMATIONS -------- */
 @keyframes fadeIn {
   from {
     background-color: rgba(0, 0, 0, 0);
   }
   to {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.65);
   }
 }
 
@@ -122,5 +152,79 @@ p {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 768px) {
+  .modal {
+    padding: 1.5rem;
+    max-width: 360px;
+  }
+
+  .avatar {
+    width: 90px;
+    height: 90px;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 1.2rem;
+    width: 95%;
+    border-radius: 0.75rem;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+
+  .deleteOneBtn,
+  .deleteBothBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .modal {
+    padding: 1rem;
+    border-radius: 0.6rem;
+  }
+
+  .avatar {
+    width: 65px;
+    height: 65px;
+  }
+
+  h2 {
+    font-size: 1rem;
+  }
+
+  p {
+    font-size: 0.8rem;
+  }
+
+  .deleteOneBtn,
+  .deleteBothBtn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
   }
 }

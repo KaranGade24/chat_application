@@ -22,3 +22,63 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+
+
+/* ================================
+   Global Scrollbar Theme
+   ================================ */
+
+/* ----- For WebKit Browsers ----- */
+::-webkit-scrollbar {
+  width: 10px;             /* scrollbar width */
+  height: 10px;            /* horizontal scrollbar height */
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(218, 100%, 8%); /* dark navy track */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(216, 100%, 30%); /* blue thumb */
+  border-radius: 8px;
+  border: 2px solid hsl(218, 100%, 8%); /* gives space effect */
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(216, 100%, 38%); /* lighter blue on hover */
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: hsl(210, 100%, 48%); /* accent blue on active drag */
+}
+
+::-webkit-scrollbar-corner {
+  background: hsl(218, 100%, 8%); /* matches track for corner */
+}
+
+/* ----- For Firefox ----- */
+* {
+  scrollbar-width: thin; /* thin scrollbar */
+  scrollbar-color: hsl(216, 100%, 30%) hsl(218, 100%, 8%);
+  /* thumb color | track color */
+}
+
+/* ================================
+   Optional - Custom Scrollbar for Specific Elements
+   (example: chat body, modal)
+   ================================ */
+/* .chatBody,
+.modal {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(216, 100%, 30%) hsl(218, 100%, 8%);
+}
+
+.chatBody::-webkit-scrollbar-thumb {
+  background: hsl(216, 100%, 35%);
+}
+
+.chatBody::-webkit-scrollbar-thumb:hover {
+  background: hsl(210, 100%, 48%);
+} */

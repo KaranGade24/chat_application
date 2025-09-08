@@ -33,12 +33,7 @@ exports.updateUser = async (req, res) => {
 
     res.status(200).json({
       message: "User updated successfully",
-      user: {
-        name: updatedUser.name,
-        email: updatedUser.email,
-        bio: updatedUser.bio || "",
-        avatar: avatarData,
-      },
+      user: updatedUser,
     });
   } catch (err) {
     console.error("Update error:", err);

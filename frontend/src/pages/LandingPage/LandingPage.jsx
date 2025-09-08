@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./LandingPage.module.css";
 import { NavLink, useNavigate } from "react-router-dom";
-
+import chatFlowLogo from "../../assets/logo.png"
 const LandingPage = () => {
   const navigate = useNavigate();
 
@@ -10,50 +10,14 @@ const LandingPage = () => {
       {/* Header with Logo and Auth Buttons */}
       <header className={styles.header}>
         <div className={styles.logoContainer}>
-          {/* Unique Chat Logo SVG */}
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 40 40"
-            className={styles.logo}
-          >
-            <defs>
-              <linearGradient
-                id="logoGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <stop offset="0%" stopColor="#4c8bf5" />
-                <stop offset="50%" stopColor="#6dd5ed" />
-                <stop offset="100%" stopColor="#ffb86b" />
-              </linearGradient>
-            </defs>
-            <circle
-              cx="12"
-              cy="15"
-              r="8"
-              fill="url(#logoGradient)"
-              opacity="0.9"
-            />
-            <circle
-              cx="28"
-              cy="15"
-              r="8"
-              fill="url(#logoGradient)"
-              opacity="0.7"
-            />
-            <path
-              d="M8 20 Q20 35 32 20"
-              stroke="url(#logoGradient)"
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <circle cx="15" cy="12" r="2" fill="white" />
-            <circle cx="25" cy="12" r="2" fill="white" />
-          </svg>
+        
+          <img
+          src={chatFlowLogo}
+          width={70}
+          height={70}
+          alt="ChatFlow Logo"
+          className={styles.logo}
+          />
           <span className={styles.brandName}>ChatFlow</span>
         </div>
         <div className={styles.authButtons}>
@@ -331,29 +295,13 @@ const LandingPage = () => {
         <div className={styles.container}>
           <div className={styles.footerContent}>
             <div className={styles.footerLogo}>
-              <svg width="30" height="30" viewBox="0 0 40 40">
-                <circle
-                  cx="12"
-                  cy="15"
-                  r="8"
-                  fill="url(#logoGradient)"
-                  opacity="0.9"
-                />
-                <circle
-                  cx="28"
-                  cy="15"
-                  r="8"
-                  fill="url(#logoGradient)"
-                  opacity="0.7"
-                />
-                <path
-                  d="M8 20 Q20 35 32 20"
-                  stroke="url(#logoGradient)"
-                  strokeWidth="3"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-              </svg>
+            <img
+          src={chatFlowLogo}
+          width={70}
+          height={70}
+          alt="ChatFlow Logo"
+          className={styles.logo}
+          />
               <span>ChatFlow</span>
             </div>
             <p>&copy; 2025 ChatFlow. All rights reserved.</p>

@@ -42,7 +42,15 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: Object,
-      default: "",
+      default: {
+        url: "",
+        filename: "",
+        type: "",
+        size: "",
+        cloudinary_id: "",
+        createdAt: "",
+        updatedAt: "",
+      }
     },
   },
   { timestamps: true }

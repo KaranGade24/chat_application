@@ -27,7 +27,7 @@ const EmptyStatePage = () => (
     </svg>
     <h2 className={styles.title}>Nothing Selected Yet</h2>
     <p className={styles.message}>
-      Click on a sidebar item to start a conversation! 💬
+      Click on a sidebar item to start a conversation!
     </p>
   </div>
 );

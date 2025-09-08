@@ -40,7 +40,12 @@ function Chat() {
   return (
     <div className={styles.chatContainer}>
       {!isMobile || !showChatOnly ? (
+      <div 
+      className={styles.userListContainer}
+      
+      >
         <UserList handleOnClick={handleOnClick} selectedUser={selectedUser} />
+      </div>
       ) : null}
       {!isMobile || showChatOnly ? (
         <>

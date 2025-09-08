@@ -9,7 +9,7 @@ import Socket from "../../../config/Socket";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user } = useContext(MessageContext);
+  const { user ,setUser} = useContext(MessageContext);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -85,6 +85,7 @@ const ProfilePage = () => {
           bio: res.data.user.bio || "",
           avatar: res.data.user.avatar?.url || "",
         });
+        setUser(res.data.user);
       }
     } catch (err) {
       console.error("Profile update failed:", err);

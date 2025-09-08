@@ -92,7 +92,7 @@ const Login = () => {
       <div className={styles.loginWrapper}>
         <ToastContainer position="top-right" autoClose={3000} />
         <div className={styles.loginCard}>
-          <h2 className={styles.title}>Welcome Back 👋</h2>
+          <h2 className={styles.title}>Welcome Back </h2>
           <p className={styles.subtitle}>Sign in to your chat account</p>
           <form onSubmit={handleSubmit} className={styles.form}>
             <input

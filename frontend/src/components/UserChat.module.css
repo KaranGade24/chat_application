@@ -1,62 +1,110 @@
+/* Chat.module.css */
+
+/* General container */
+.userChat {
+  display: flex;
+  flex-direction: column;
+  background-color: hsl(219.13deg 100% 9.02%); /* overall dark theme */
+  color: white;
+  width: 30%;
+  min-width: 280px;
+  height: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  flex: 1;
+  word-break: break-word;
+  border-left: 1px solid hsl(216.59deg 100% 20%);
+  margin-top: 15px;
+}
+
+/* Loading message */
 .loadingMsg {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
+  color: hsl(216.59deg 100% 45%);
+  font-size: 1rem;
+  font-style: italic;
 }
 
-.userChat {
-  display: flex;
-  flex-direction: column;
-  background-color: hsl(0deg 0% 100%);
-  color: #fff;
-  padding: 0;
-  box-sizing: border-box;
-  width: 30%;
-  min-width: 250px;
-  height: 100%;
-  overflow-y: auto;
-  flex: 1;
-  word-break: break-all;
-  word-wrap: break-word;
-}
-
-/* Header */
+/* ---------------- HEADER ---------------- */
 .header {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid #333;
-  color: hsl(231deg 10% 27%);
+  background-color: hsl(218.49deg 100% 10.39%); /* dark top bar */
+  color: white;
+  border-bottom: 1px solid hsl(216.59deg 100% 20%);
   cursor: pointer;
+  margin-top: 12px;
 }
 
-.backArrow {
-  display: none;
-  font-size: 20px;
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: hsl(218.49deg 100% 10.39%); /* dark header background */
+  color: hsl(210.61deg 100% 48.04%); /* accent blue */
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid hsl(216.59deg 100% 20%);
+  border-radius: 20px;
   cursor: pointer;
-  color: #ccc;
-  padding: 6px;
-  border-radius: 50%;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.backArrow:hover {
-  background-color: #2a2a2a;
-  color: #fff;
+.backBtn svg {
+  color: hsl(210.61deg 100% 48.04%);
+  transition: color 0.3s ease;
 }
+
+.backBtn:hover {
+  background-color: hsl(216.59deg 100% 20%);
+  color: white;
+  border-color: hsl(216.52deg 100% 27.06%);
+}
+
+.backBtn:hover svg {
+  color: white;
+}
+
+.backBtn:active {
+  transform: scale(0.96);
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+  .backBtn {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 769px) {
+  .backBtn {
+    display: none;
+  }
+}
+
+
 
 .profilePic {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   margin-right: 12px;
+  object-fit: cover;
+  border: 2px solid hsl(216.52deg 100% 27.06%);
 }
 
 .userName {
   margin: 0;
-  font-size: 18px;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .status {
@@ -70,136 +118,165 @@
 .online {
   background-color: #4caf50;
 }
-
 .offline {
   background-color: #f44336;
 }
-
 .away {
   background-color: #ff9800;
 }
-
 .busy {
   background-color: #9c27b0;
 }
 
-/* Chat Body */
+/* ---------------- CHAT BODY ---------------- */
 .chatBody {
   flex: 1;
   padding: 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* My message bubble */
 .myMessage {
   align-self: flex-end;
-  background-color: hsl(210deg 100% 97%);
-  color: hsl(224deg 18% 28%);
+  background-color: hsl(216.06deg 94.42% 42.16%); /* blue accent */
   padding: 10px 16px;
-  border-radius: 20px;
+  border-radius: 20px 20px 4px 20px;
   max-width: 60%;
   word-wrap: break-word;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.myMessage p {
+  color: white;
 }
 
+/* Their message bubble */
 .theirMessage {
   align-self: flex-start;
-  background-color: hsl(213deg 94% 64%);
-  color: hsl(182deg 100% 88%);
+  background-color: hsl(216.92deg 72.22% 14.12%); /* dark gray-blue */
   padding: 10px 16px;
-  border-radius: 20px;
+  border-radius: 20px 20px 20px 4px;
   max-width: 60%;
   word-wrap: break-word;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.theirMessage p{
+  color: white;
 }
 
-/* Input Area */
+/* Attachments inside chat */
+.attachmentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chatImage {
+  width: 220px;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid hsl(216.59deg 100% 20%);
+}
+
+.chatVideo {
+  width: 300px;
+  max-height: 250px;
+  border-radius: 10px;
+  border: 1px solid hsl(216.59deg 100% 20%);
+}
+
+.chatPDF {
+  border: 1px solid hsl(216.59deg 100% 27.06%);
+  border-radius: 6px;
+  background: hsl(216.92deg 72.22% 14.12%);
+  padding: 8px;
+}
+
+.chatFileDownload {
+  font-weight: 500;
+  text-decoration: none;
+  color: hsl(210.61deg 100% 48.04%);
+  background: hsl(218.71deg 91.18% 13.33%);
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  max-width: 300px;
+  overflow-wrap: break-word;
+  transition: background 0.3s ease;
+}
+
+.chatFileDownload:hover {
+  background: hsl(216.59deg 100% 20%);
+}
+
+/* ---------------- INPUT AREA ---------------- */
 .inputArea {
   display: flex;
+  align-items: center;
   padding: 12px 16px;
-  border-top: 1px solid #333;
-  background-color: hsl(0deg 0% 100%);
+  border-top: 1px solid hsl(216.59deg 100% 20%);
+  background-color: hsl(218.49deg 100% 10.39%); /* input bar bg */
+  gap: 10px;
+  height: 76px;
 }
 
 .input {
   flex: 1;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-radius: 20px;
   border: none;
   outline: none;
-  background-color: hsl(0deg 0% 100%);
-  color: hsl(210, 2%, 25%);
+  background-color: hsl(218.71deg 91.18% 13.33%); /* input box bg */
+  color: white;
   font-size: 14px;
   margin-right: 10px;
-  width: 1px;
+  transition: box-shadow 0.3s ease, border 0.3s ease;
 }
 
+.input::placeholder {
+  color: #aaa;
+}
+
+.input:focus {
+  box-shadow: 0 0 0 2px hsl(216.52deg 100% 27.06%);
+}
+
+/* Send button */
 .sendBtn {
-  background-color: hsl(214deg 43% 49%);
+  background-color: hsl(216.52deg 100% 27.06%);
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 20px;
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.3s;
-}
-.typingIndicator {
-  font-size: 13px;
-  color: #999;
-  margin-left: 10px;
-  display: flex;
-  align-items: center;
+  transition: background 0.3s, transform 0.2s ease;
 }
 
-.dots span {
-  animation: blink 1.5s infinite;
-  margin-left: 2px;
+.sendBtn:hover {
+  background-color: hsl(216.59deg 100% 35.69%);
+  transform: scale(1.05);
 }
 
-.dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes blink {
-  0%,
-  20% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.2;
-  }
-}
-
-.inputArea {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  border-top: 1px solid #eee;
-  background: #fff;
-  position: relative;
-}
-
-.input {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  margin-right: 10px;
-}
-
+/* File upload icon */
 .fileUpload {
   cursor: pointer;
   font-size: 20px;
-  margin: 0 10px;
+  color: hsl(210.61deg 100% 48.04%); /* accent for svg icons */
+  transition: color 0.3s ease, transform 0.2s ease;
 }
 
+.fileUpload:hover {
+  color: hsl(216.59deg 100% 45%);
+  transform: scale(1.1);
+}
+
+/* Emoji picker */
 .emojiPicker {
   position: absolute;
   bottom: 60px;
@@ -209,18 +286,20 @@
   width: 100%;
   max-width: 320px;
   overflow-y: auto;
-  background: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  background: hsl(218.49deg 100% 10.39%);
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
   border-radius: 8px;
+  padding: 8px;
 }
 
+/* ---------------- TYPING INDICATOR ---------------- */
 .typingIndicator {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 0.9rem;
   font-style: italic;
-  color: green; /* Tailwind slate-500 */
+  color: hsl(210.61deg 100% 48.04%);
   padding-left: 0.75rem;
   margin-bottom: 8px;
   animation: fadeInTyping 0.3s ease-in-out;
@@ -233,88 +312,38 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: green;
+  background: hsl(210.61deg 100% 48.04%);
   animation: blink 1s infinite;
 }
 
-.attachmentWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.dots span {
+  animation: blink 1.5s infinite;
+  margin-left: 2px;
 }
 
-.chatImage {
-  width: 200px;
-  max-height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
 
-.chatVideo {
-  width: 300px;
-  max-height: 250px;
-  border-radius: 10px;
-}
-
-.chatPDF {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.chatFileDownload {
-  font-weight: 500;
-  text-decoration: none;
-  color: #2e7dff;
-  background: #f5f5f5;
-  padding: 6px 10px;
-  border-radius: 8px;
-  display: inline-block;
-  max-width: 300px;
-  overflow-wrap: break-word;
-}
-
+/* ---------------- ANIMATIONS ---------------- */
 @keyframes blink {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 1;
-  }
+  0%, 20% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
 }
 
 @keyframes fadeInTyping {
-  from {
-    opacity: 0;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ---------------- RESPONSIVE ---------------- */
 @media (max-width: 768px) {
-  .chatPDF {
-    margin-right: 10px;
-    width: 120px;
-  }
-  .chatImage {
-    margin-right: 10px;
-    width: 120px;
-  }
-  .chatVideo {
-    margin-right: 10px;
-    width: 120px;
-    height: auto;
-  }
-  a {
-    cursor: pointer;
-  }
-  .backArrow {
-    display: block;
-  }
+  .chatPDF { width: 120px; }
+  .chatImage { width: 120px; }
+  .chatVideo { width: 160px; height: auto; }
+  a { cursor: pointer; }
+
+  .backArrow { display: block; }
   .emojiPicker {
     width: 95%;
     right: 2.5%;
@@ -322,5 +351,185 @@
     bottom: 70px;
     max-width: none;
     max-height: 250px;
+  }
+}
+
+
+/* ---------------- RESPONSIVE ---------------- */
+
+/* Tablets / small laptops */
+@media (max-width: 1024px) {
+  .userChat {
+    width: 40%;
+    min-width: 260px;
+  }
+
+  .chatImage {
+    width: 180px;
+    max-height: 180px;
+  }
+
+  .chatVideo {
+    width: 220px;
+    max-height: 180px;
+  }
+}
+
+/* Large phones & portrait tablets */
+@media (max-width: 768px) {
+  .userChat {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .chatBody {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .chatImage {
+    width: 140px;
+    max-height: 140px;
+  }
+
+  .chatVideo {
+    width: 180px;
+    height: auto;
+  }
+
+  .chatPDF {
+    width: 140px;
+  }
+
+  .header {
+    padding: 10px 12px;
+  }
+
+  .profilePic {
+    width: 40px;
+    height: 40px;
+  }
+
+  .userName {
+    font-size: 1rem;
+  }
+
+  .backBtn {
+    display: inline-flex;
+  }
+
+  .emojiPicker {
+    width: 95%;
+    right: 2.5%;
+    left: 2.5%;
+    bottom: 70px;
+    max-width: none;
+    max-height: 250px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .userChat {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .chatBody {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .myMessage,
+  .theirMessage {
+    max-width: 80%;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  .chatImage {
+    width: 120px;
+    max-height: 120px;
+  }
+
+  .chatVideo {
+    width: 140px;
+    max-height: 120px;
+  }
+
+  .chatPDF {
+    width: 120px;
+  }
+
+  .input {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .sendBtn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Very small devices (extra tiny phones, <=300px) */
+@media (max-width: 300px) {
+  .header {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .userName {
+    font-size: 0.9rem;
+  }
+
+  .profilePic {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chatBody {
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .myMessage,
+  .theirMessage {
+    max-width: 90%;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    border-radius: 12px;
+  }
+
+  .chatImage {
+    width: 100px;
+    max-height: 100px;
+  }
+
+  .chatVideo {
+    width: 120px;
+    max-height: 100px;
+  }
+
+  .chatPDF {
+    width: 100px;
+    font-size: 0.75rem;
+    padding: 6px;
+  }
+
+  .input {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .sendBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .backBtn {
+    gap: 4px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
 }

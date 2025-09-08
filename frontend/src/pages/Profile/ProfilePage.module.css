@@ -1,198 +1,325 @@
+/* ProfilePage.module.css */
+
+/* ---------- PAGE LAYOUT ---------- */
 .page {
-  margin-top: 20px;
-  padding: 2rem;
   display: flex;
   justify-content: center;
-  background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
-  min-height: calc(100vh - 80px);
+  align-items: flex-start;
+  background: hsl(219.13deg 100% 9.02%);
+  color: white;
+  min-height: 100vh;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  margin-top: 27px;
 }
 
 .card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 600px;
-  padding: 2rem;
+  max-width: 480px;
+  background: hsl(218.49deg 100% 10.39%);
+  border: 1px solid hsl(216.59deg 100% 20%);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
 }
 
+/* ---------- HEADER ---------- */
 .header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
 }
 
+.title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.editToggle {
+  background: hsl(216.52deg 100% 27.06%);
+  border: none;
+  color: white;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.editToggle:hover {
+  background: hsl(216.59deg 100% 35.69%);
+  transform: scale(1.05);
+}
+
+.editToggle:active {
+  transform: scale(0.95);
+}
+
+/* ---------- AVATAR ---------- */
 .avatarWrapper {
   position: relative;
+  display: inline-block;
 }
 
 .avatar {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
+  border: 3px solid hsl(216.52deg 100% 27.06%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .avatarIcon {
-  font-size: 100px;
-  color: #bbb;
+  font-size: 120px;
+  color: hsl(216.59deg 100% 20%);
 }
 
 .cameraLabel {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  background: #fff;
-  border-radius: 50%;
-  padding: 6px;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: background 0.2s;
-}
-.cameraLabel:hover {
-  background: #f0f0f0;
-}
-
-.title {
-  flex: 1;
-  text-align: center;
-  font-size: 1.5rem;
-  margin: 0;
-  color: #333;
-}
-
-.editToggle {
-  background: #4f46e5;
+  bottom: 8px;
+  right: 8px;
+  background: hsl(216.52deg 100% 27.06%);
   color: white;
-  border: none;
-  padding: 0.4rem 1rem;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
-}
-.editToggle:hover {
-  background: #4338ca;
+  transition: background 0.3s ease;
 }
 
+.cameraLabel:hover {
+  background: hsl(216.59deg 100% 35.69%);
+}
+
+/* ---------- FORM ---------- */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .field {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.6rem 0.8rem;
-  transition: border-color 0.2s;
-}
-.field:focus-within {
-  border-color: #4f46e5;
+  background: hsl(218.71deg 91.18% 13.33%);
+  border: 1px solid hsl(216.59deg 100% 20%);
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
 .fieldIcon {
-  color: #4a5568;
-  font-size: 1.2rem;
+  color: hsl(210.61deg 100% 48.04%);
+  font-size: 1rem;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .field input,
 .field textarea {
   flex: 1;
+  background: transparent;
   border: none;
   outline: none;
-  font-size: 1rem;
-  color: #2d3748;
-  background: transparent;
+  color: white;
+  font-size: 0.95rem;
+  resize: none;
 }
 
-.pwdToggle {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: transparent;
+.field input:disabled,
+.field textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- BUTTONS ---------- */
+.logoutBtn {
+  background: hsl(0, 100%, 40%);
   border: none;
-  color: #4f46e5;
-  cursor: pointer;
+  color: white;
   font-weight: 500;
+  font-size: 0.95rem;
+  padding: 10px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.logoutBtn:hover {
+  background: hsl(0, 100%, 30%);
+  transform: scale(1.05);
 }
 
 .saveBtn {
-  align-self: flex-end;
-  background: #10b981;
-  color: white;
+  background: hsl(210.61deg 100% 48.04%);
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 10px 18px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
+
 .saveBtn:hover {
-  background: #0f9f6e;
+  background: hsl(210.61deg 100% 55%);
+  transform: scale(1.05);
 }
 
-/* Responsive */
-@media (max-width: 480px) {
+.saveBtn:disabled {
+  background: hsl(216.59deg 100% 20%);
+  cursor: not-allowed;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+/* Tablets / small laptops */
+@media (max-width: 1024px) {
   .card {
-    padding: 1.5rem;
+    max-width: 420px;
+    padding: 20px;
   }
-  .avatar,
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+  }
+
   .avatarIcon {
-    width: 80px;
-    height: 80px;
-    font-size: 80px;
+    font-size: 100px;
   }
+
   .title {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
   }
 }
 
+/* Large phones & portrait tablets */
+@media (max-width: 768px) {
+  .page {
+    padding: 20px 10px;
+  }
+
+  .card {
+    max-width: 100%;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .avatar {
+    width: 90px;
+    height: 90px;
+  }
+
+  .avatarIcon {
+    font-size: 90px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .field {
+    padding: 8px 10px;
+  }
+
+  .field input,
+  .field textarea {
+    font-size: 0.9rem;
+  }
+
+  .saveBtn,
+  .logoutBtn,
+  .editToggle {
+    font-size: 0.9rem;
+    padding: 8px 14px;
+  }
+}
+
+/* Small phones */
 @media (max-width: 480px) {
   .page {
-    padding: 1rem;
+    padding: 16px 8px;
   }
 
   .card {
-    padding: 1.2rem;
-    max-width: 100%;
+    padding: 12px;
+    gap: 14px;
   }
 
-  .avatar,
+  .avatar {
+    width: 70px;
+    height: 70px;
+  }
+
   .avatarIcon {
-    width: 80px;
-    height: 80px;
-    font-size: 80px;
+    font-size: 70px;
   }
 
   .title {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
 
+  .field {
+    padding: 6px 8px;
+    border-radius: 10px;
+  }
+
+  .fieldIcon {
+    font-size: 0.9rem;
+    margin-right: 6px;
+  }
+
+  .field input,
+  .field textarea {
+    font-size: 0.85rem;
+  }
+
+  .saveBtn,
+  .logoutBtn,
   .editToggle {
     font-size: 0.85rem;
-    padding: 0.3rem 0.8rem;
+    padding: 6px 12px;
+    border-radius: 16px;
   }
 
-  .saveBtn {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
+  .cameraLabel {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
   }
 }
 
-@media (max-width: 320px) {
-  .card {
-    padding: 1rem;
+/* Very small devices (≤300px) */
+@media (max-width: 300px) {
+  .page {
+    padding: 12px 4px;
   }
 
-  .avatar,
-  .avatarIcon {
+  .card {
+    padding: 10px;
+    gap: 10px;
+    border-radius: 10px;
+  }
+
+  .avatar {
     width: 60px;
     height: 60px;
+  }
+
+  .avatarIcon {
     font-size: 60px;
   }
 
@@ -200,41 +327,26 @@
     font-size: 1rem;
   }
 
-  .editToggle,
-  .saveBtn {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.8rem;
-  }
-
   .field {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
+    padding: 4px 6px;
+    gap: 4px;
   }
 
   .field input,
   .field textarea {
-    width: 100%;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
-  .pwdToggle {
-    font-size: 0.85rem;
-    padding-top: 4px;
+  .saveBtn,
+  .logoutBtn,
+  .editToggle {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 14px;
   }
-}
-.logoutBtn {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  margin-top: 1.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
 
-.logoutBtn:hover {
-  background-color: #d32f2f;
+  .cameraLabel {
+    width: 24px;
+    height: 24px;
+  }
 }

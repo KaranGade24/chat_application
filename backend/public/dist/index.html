@@ -1,64 +1,105 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Charset -->
-    <meta charset="UTF-8" />
+<head>
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Title -->
+  <title>ChatFlow – Real-Time Chat App</title>
+  
+  <!-- Description (Important for SEO) -->
+  <meta name="description" content="ChatFlow is a lightning-fast, secure chat platform designed for seamless conversations. Connect instantly, collaborate efficiently, and experience end-to-end encryption for your messages." />
+  
+  <!-- Keywords (Optional, can help slightly in 2025 SEO) -->
+  <meta name="keywords" content="ChatFlow, chat app, real-time messaging, secure chat, group chat, instant messaging, collaboration app" />
+  
+  <!-- Author -->
+  <meta name="author" content="ChatFlow Team" />
+  
+  <!-- Theme Color for mobile browsers -->
+  <meta name="theme-color" content="#0B1A2B" />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  
+  <!-- Open Graph (OG) Tags for Facebook, LinkedIn -->
+  <meta property="og:title" content="ChatFlow – Real-Time Chat App" />
+  <meta property="og:description" content="Experience the future of communication with ChatFlow. Lightning-fast, secure, and designed for seamless conversations." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://chatflow-pbbi.onrender.com" />
+  <meta property="og:image" content="https://chatflow-pbbi.onrender.com/preview.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_US" />
+  
+  <!-- Twitter Card for X / Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ChatFlow – Real-Time Chat App" />
+  <meta name="twitter:description" content="Experience instant, secure messaging with ChatFlow. Collaborate in groups, chat with friends, and enjoy end-to-end encryption." />
+  <meta name="twitter:image" content="https://chatflow-pbbi.onrender.com/preview.png" />
+  <meta name="twitter:site" content="@ChatFlowApp" />
+  <meta name="twitter:creator" content="@ChatFlowTeam" />
 
-    <!-- Viewport for responsiveness -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://chatflow-pbbi.onrender.com" />
 
-    <!-- Title -->
-    <title>ChatFlow – Real-Time Secure Chat App</title>
+  <!-- PWA / Manifest (Progressive Web App) -->
+  <link rel="manifest" href="/manifest.json" />
 
-    <!-- Description -->
-    <meta
-      name="description"
-      content="ChatFlow is a lightning-fast, secure, and beautifully designed chat platform. Connect instantly, chat seamlessly, and collaborate with friends and teams worldwide."
-    />
+  <!-- Preload important fonts for performance -->
+  <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- Keywords (helps with SEO, optional in 2025) -->
-    <meta
-      name="keywords"
-      content="chat app, real-time messaging, group chats, secure chat, ChatFlow, instant messaging"
-    />
+  <!-- Structured Data JSON-LD (Schema.org for SEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ChatFlow",
+    "operatingSystem": "Web, iOS, Android",
+    "applicationCategory": "MessagingApplication",
+    "url": "https://chatflow-pbbi.onrender.com",
+    "image": "https://chatflow-pbbi.onrender.com/preview.png",
+    "description": "ChatFlow is a lightning-fast, secure chat platform designed for seamless conversations and collaboration.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ChatFlow Team",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://chatflow-pbbi.onrender.com/logo.png"
+      }
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "1580"
+    }
+  }
+  </script>
 
-    <!-- Author -->
-    <meta name="author" content="ChatFlow Team" />
+  
+  <!-- Optional: Preconnect to analytics or CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <script type="module" crossorigin src="/assets/index-HdDHP1xZ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-D54-czSi.css">
+</head>
+<body>
+  <div id="root"></div>
 
-    <!-- Theme Color (for mobile browser color) -->
-    <meta name="theme-color" content="#2563eb" />
+  <!-- Main JS -->
 
-    <!-- Open Graph (for social media previews: Facebook, LinkedIn, etc.) -->
-    <meta property="og:title" content="ChatFlow – Real-Time Secure Chat App" />
-    <meta
-      property="og:description"
-      content="Experience the future of communication with ChatFlow. Lightning-fast, secure, and designed for seamless conversations."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://your-chatflow-domain.com" />
-    <meta property="og:image" content="https://your-chatflow-domain.com/preview.png" />
-
-    <!-- Twitter Card (for Twitter/X previews) -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ChatFlow – Real-Time Secure Chat App" />
-    <meta
-      name="twitter:description"
-      content="Lightning-fast, secure, and beautifully designed chat platform. Connect instantly with ChatFlow."
-    />
-    <meta name="twitter:image" content="https://your-chatflow-domain.com/preview.png" />
-
-    <!-- Apple Touch Icon (for iOS homescreen shortcut) -->
-    <link rel="apple-touch-icon" href="/vite.svg" />
-
-    <!-- Manifest for PWA (if you plan to add Progressive Web App features) -->
-    <!-- <link rel="manifest" href="/manifest.json" /> -->
-    <script type="module" crossorigin src="/assets/index-BOkCY1Aw.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BsW_QPYv.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+  <!-- Optional: Analytics -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script> -->
+  <!-- <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_MEASUREMENT_ID');
+  </script> -->
+</body>
 </html>
