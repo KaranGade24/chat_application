@@ -78,7 +78,7 @@ ChatFlow was created to provide a seamless, secure, and feature-rich communicati
 ### 🔐 Login Page
 
 <p align="center">  
-  <img src="./screenshots/login.png" alt="Login Page" width="400"/>  
+  <img src="./screenshots/login.png" alt="Login Page" width="800"/>  
 </p>
 
 ---
