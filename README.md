@@ -13,8 +13,6 @@ A modern, full-stack real-time chat application with secure authentication, file
 - Project Structure
 - Setup & Installation
 - Usage
-- Running Tests
-- Deployment
 
 ---
 
@@ -63,8 +61,41 @@ ChatFlow was created to provide a seamless, secure, and feature-rich communicati
 
 ## Screenshots
 
-> _Add screenshots or a demo GIF here!_
+> Perfect 🚀 You’ve got 4 key pages (Landing, Login, Chat, Call). I’ll give you a **stylish screenshot section** that you can drop right into your `README.md`.
 
+---
+
+## 📸 Screenshots
+
+### 🏠 Landing Page
+
+<p align="center">  
+  <img src="./screenshots/landing.png" alt="Landing Page" width="800"/>  
+</p>
+
+---
+
+### 🔐 Login Page
+
+<p align="center">  
+  <img src="./screenshots/login.png" alt="Login Page" width="400"/>  
+</p>
+
+---
+
+### 💬 Chat Interface
+
+<p align="center">  
+  <img src="./screenshots/chat.png" alt="Chat Interface" width="800"/>  
+</p>
+
+---
+
+### 📞 Call Screen
+
+<p align="center">  
+  <img src="./screenshots/call.png" alt="Call Screen" width="800"/>  
+</p>  
 ---
 
 ## Project Structure

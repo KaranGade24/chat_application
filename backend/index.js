@@ -15,7 +15,7 @@ const { health } = require("./controller/helth");
 const app = express();
 app.use(
   cors({
-    origin: "*", // your frontend
+    origin: "https://miniature-doodle-4x9wv74674j3qv45-5173.app.github.dev", // your frontend
     credentials: true, // allow cookies to be sent
   })
 );
