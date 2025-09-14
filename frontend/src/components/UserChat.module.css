@@ -90,8 +90,6 @@
   }
 }
 
-
-
 .profilePic {
   width: 48px;
   height: 48px;
@@ -147,7 +145,7 @@
   max-width: 60%;
   word-wrap: break-word;
   font-size: 0.95rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .myMessage p {
   color: white;
@@ -162,9 +160,9 @@
   max-width: 60%;
   word-wrap: break-word;
   font-size: 0.95rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
-.theirMessage p{
+.theirMessage p {
   color: white;
 }
 
@@ -223,6 +221,13 @@
   background-color: hsl(218.49deg 100% 10.39%); /* input bar bg */
   gap: 10px;
   height: 76px;
+}
+
+.inputArea .emojiBtn {
+  margin: 5px;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
 }
 
 .input {
@@ -287,7 +292,7 @@
   max-width: 320px;
   overflow-y: auto;
   background: hsl(218.49deg 100% 10.39%);
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
   border-radius: 8px;
   padding: 8px;
 }
@@ -321,29 +326,57 @@
   margin-left: 2px;
 }
 
-.dots span:nth-child(2) { animation-delay: 0.2s; }
-.dots span:nth-child(3) { animation-delay: 0.4s; }
+.dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 /* ---------------- ANIMATIONS ---------------- */
 @keyframes blink {
-  0%, 20% { opacity: 0.2; }
-  50% { opacity: 1; }
-  100% { opacity: 0.2; }
+  0%,
+  20% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
 }
 
 @keyframes fadeInTyping {
-  from { opacity: 0; transform: translateY(2px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ---------------- RESPONSIVE ---------------- */
 @media (max-width: 768px) {
-  .chatPDF { width: 120px; }
-  .chatImage { width: 120px; }
-  .chatVideo { width: 160px; height: auto; }
-  a { cursor: pointer; }
+  .chatPDF {
+    width: 120px;
+  }
+  .chatImage {
+    width: 120px;
+  }
+  .chatVideo {
+    width: 160px;
+    height: auto;
+  }
+  a {
+    cursor: pointer;
+  }
 
-  .backArrow { display: block; }
+  .backArrow {
+    display: block;
+  }
   .emojiPicker {
     width: 95%;
     right: 2.5%;
@@ -353,7 +386,6 @@
     max-height: 250px;
   }
 }
-
 
 /* ---------------- RESPONSIVE ---------------- */
 
@@ -463,12 +495,42 @@
 
   .input {
     font-size: 13px;
-    padding: 8px 12px;
+    padding: 13px 12px;
+    height: 30px;
+    width: 130px;
+    margin-right: 20px;
+    border: solid 1px rgb(15, 15, 207);
   }
 
   .sendBtn {
-    padding: 8px 16px;
-    font-size: 13px;
+    margin-left: -20px;
+    padding: 13px;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .backBtn {
+    gap: 4px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .inputArea {
+    width: 100%;
+  }
+  .sendIcon {
+    margin: -2px;
+  }
+  .inputArea .emojiBtn {
+    height: 30px;
+    padding: 5px;
+    width: 30px;
+    margin-left: -10px;
+  }
+  .fileInput {
+    margin-left: -15px;
   }
 }
 

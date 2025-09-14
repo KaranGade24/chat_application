@@ -12,6 +12,7 @@ import UserInfoModal from "./UserInfoModal";
 import { ArrowLeft, FileUpIcon } from "lucide-react";
 import axios from "axios";
 import SelectedFilesPreview from "./SelectedFilesPreview";
+import { v4 as uuidv4 } from "uuid";
 
 export default function UserChat({
   selectedUser,
@@ -27,6 +28,7 @@ export default function UserChat({
     users,
     setUsers,
     setUserStatuses,
+    userStatuses,
   } = useMessageContext();
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [userMessages, setUserMessages] = useState([]);
@@ -39,7 +41,7 @@ export default function UserChat({
   const [selectedFilesPreviewModel, setSelectedFilesPreviewModel] =
     useState(false);
   const [files, setFiles] = useState([]);
-
+  const userStatus = useRef(null);
   // Initialize socket once per user
   const socket = useMemo(() => {
     if (!user) return null;
@@ -48,6 +50,20 @@ export default function UserChat({
   const [loadingToSendFiles, setLoadingToSendFiles] = useState(false);
 
   // listen is online or lastSeen
+  useEffect(() => {
+    const status = userStatuses.find((u) => u._id === selectedUser?._id);
+    let statusText = "";
+    if (status?.isOnline) {
+      statusText = "online";
+    } else if (status?.lastSeen) {
+      const formatted = new Intl.DateTimeFormat("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(status.lastSeen));
+      statusText = `last seen: ${formatted}`;
+    }
+    userStatus.current = statusText;
+  }, [userStatuses, user]);
 
   useEffect(() => {
     // Listen to real-time broadcast of all user statuses from server
@@ -249,8 +265,9 @@ export default function UserChat({
           }
         );
         if (res.status === 201) {
+          console.log(res.data);
           const msg = {
-            _id: user._id,
+            _id: res.data._id || uuidv4(),
             from: "me",
             text: "",
             attachments: res.data.attachments,
@@ -267,6 +284,17 @@ export default function UserChat({
           });
 
           setUserMessages((prev) => [...prev, msg]);
+
+          setUsers((prevUsers) =>
+            prevUsers.map((u) =>
+              u._id === selectedUser._id
+                ? {
+                    ...u,
+                    Messages: [...(u.Messages || []), msg],
+                  }
+                : u
+            )
+          );
         }
       } catch (err) {
         console.error("Upload failed:", err);
@@ -337,14 +365,14 @@ export default function UserChat({
           >
             {onBack && (
               <button
-              className={styles.backBtn}
-              onClick={(e) => {
-                e.preventDefault();
-                onBack();
-              }}
-            >
-              <ArrowLeft size={18} strokeWidth={2.2} />
-            </button>
+                className={styles.backBtn}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onBack();
+                }}
+              >
+                <ArrowLeft size={18} strokeWidth={2.2} />
+              </button>
             )}
             <img
               src={selectedUser.avatar?.url || defaultAvatar}
@@ -353,19 +381,7 @@ export default function UserChat({
             />
             <div className={styles.userInfo}>
               <h3>{selectedUser?.name}</h3>
-              <span className={styles.status}>
-                {selectedUserStatus?.isOnline
-                  ? ""
-                  : selectedUserStatus?.lastSeen
-                  ? `last seen: ${new Date(
-                      selectedUserStatus.lastSeen
-                    ).toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}`
-                  : ""}
-              </span>
+              <span className={styles.status}>{userStatus?.current}</span>
               {isTyping && (
                 <div className={styles.typingIndicator}>Typing...</div>
               )}
@@ -473,7 +489,6 @@ export default function UserChat({
             {!selectedFilesPreviewModel && (
               <>
                 <button
-                  style={{ margin: "5px", width: "24px", height: "24px" }}
                   className={styles.emojiBtn}
                   onClick={() => setShowEmojiPicker((v) => !v)}
                 >
@@ -487,7 +502,7 @@ export default function UserChat({
               </>
             )}
 
-            <span>
+            <span className={styles.fileInput}>
               <input
                 multiple
                 type="file"
@@ -539,7 +554,7 @@ export default function UserChat({
                 }
               }}
             >
-              <AiOutlineSend size={20} />
+              <AiOutlineSend className={styles.sendIcon} />
             </button>
           </div>
         </>

@@ -10,6 +10,7 @@ const http = require("http");
 const { socketfuntion } = require("./config/socket");
 const { cloudinaryConnection } = require("./config/cloudinaryConnection");
 const path = require("path");
+const { health } = require("./controller/helth");
 
 const app = express();
 app.use(
@@ -56,6 +57,8 @@ app.use("/auth", authRouter);
 const fetchFriendsRouter = require("./router/friends");
 app.use("/friends", authenticate, fetchFriendsRouter);
 
+//helth
+app.use("/health", authenticate, health);
 //message
 const messageRouter = require("./router/message");
 app.use("/messages", authenticate, messageRouter);
@@ -78,7 +81,5 @@ console.log(path.join(__dirname, "public", "dist", "index.html"));
 const port = 8080;
 
 server.listen(port, async () => {
-  // const user = await User.find();
-  // console.log("All registered user list: ", { user });
   console.log(`Server is running on http://localhost:${port}`);
 });

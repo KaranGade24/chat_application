@@ -25,16 +25,16 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
 
   return (
     <div className={styles.userList}>
-     <div className={styles.header}>
-  <h2 className={styles.title}>Users</h2>
-  <button
-    onClick={handleAddClick}
-    className={styles.addBtn}
-    title="Add Friend"
-  >
-    <Plus size={20} strokeWidth={2.5} /> {/* Lucide Plus icon */}
-  </button>
-</div>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Users</h2>
+        <button
+          onClick={handleAddClick}
+          className={styles.addBtn}
+          title="Add Friend"
+        >
+          <Plus size={20} strokeWidth={2.5} /> {/* Lucide Plus icon */}
+        </button>
+      </div>
 
       {isModalOpen && (
         <AddFriendModal
@@ -46,7 +46,7 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
       <ul className={styles.userItems}>
         {users.map((user, index) => {
           const status = userStatuses.find((u) => u._id === user._id);
-          let statusText = "online";
+          let statusText = "";
           if (status?.isOnline) {
             statusText = "online";
           } else if (status?.lastSeen) {
@@ -64,19 +64,12 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
                 if (mode === "chat") handleOnClick?.(e, user);
               }}
               className={styles.userItem}
-              // style={{
-              //   backgroundColor:
-              //     selectedUser?._id === user._id
-              //       ? "#968e8e9d"
-              //       : "hsl(0deg 0% 100%)",
-              // }}
               style={{
                 backgroundColor:
                   selectedUser?._id === user._id
                     ? "hsl(216.59deg 100% 35.69%)"
                     : "hsl(219.13deg 100% 9.02%)",
               }}
-              
             >
               <img
                 src={user.avatar?.url || defaultAvatar}
@@ -85,9 +78,7 @@ function UserList({ handleOnClick, selectedUser, onAction, mode = "chat" }) {
               />
               <div className={styles.userInfo}>
                 <p className={styles.userName}>{user?.name}</p>
-                <span
-                  className={`${styles.status} ${styles[user.status]}`}
-                >
+                <span className={`${styles.status} ${styles[user.status]}`}>
                   {statusText}
                 </span>
 
