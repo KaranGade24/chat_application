@@ -10,14 +10,17 @@ const http = require("http");
 const { socketfuntion } = require("./config/socket");
 const { cloudinaryConnection } = require("./config/cloudinaryConnection");
 const path = require("path");
-const { health } = require("./controller/helth");
+const { health } = require("./controller/health");
 
 const app = express();
 app.use(
   cors({
-    origin: "https://miniature-doodle-4x9wv74674j3qv45-5173.app.github.dev", // your frontend
+    origin: [
+      "https://miniature-doodle-4x9wv74674j3qv45-5173.app.github.dev",
+      "http://localhost:5173",
+    ], // your frontend
     credentials: true, // allow cookies to be sent
-  })
+  }),
 );
 app.use(bodyParser.json());
 app.use(express.json());
