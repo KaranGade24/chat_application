@@ -11,9 +11,9 @@ const Signup = () => {
   const name = useRef("");
   const email = useRef("");
   const password = useRef("");
-  const otp = useRef("");
-  const [otpVerify, setOtpVerify] = useState(false);
-  const [getOtp, setGetOtp] = useState(false);
+  // const otp = useRef("");
+  // const [otpVerify, setOtpVerify] = useState(false);
+  // const [getOtp, setGetOtp] = useState(false);
   useEffect(() => {
     setLoading(false);
   }, []);
@@ -30,7 +30,7 @@ const Signup = () => {
           email: user.email,
           password: user.password,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.status === 201) {
         const doc = res.data;
@@ -70,7 +70,7 @@ const Signup = () => {
           rtl: false, // for right-to-left languages
           icon: true, // or pass a custom icon component
           role: "alert", // for accessibility
-        }
+        },
       );
       return;
     } finally {
@@ -78,112 +78,112 @@ const Signup = () => {
     }
   };
 
-  const handleOtpVerify = async (otp, email) => {
-    try {
-      if (!otp || !email)
-        return toast.warning("Please enter OTP or email", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      setLoading(true);
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
-        {
-          otp,
-          email,
-        },
-        { withCredentials: true }
-      );
+  // const handleOtpVerify = async (otp, email) => {
+  //   try {
+  //     if (!otp || !email)
+  //       return toast.warning("Please enter OTP or email", {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //     setLoading(true);
+  //     const res = await axios.post(
+  //       `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
+  //       {
+  //         otp,
+  //         email,
+  //       },
+  //       { withCredentials: true }
+  //     );
 
-      if (res.status === 200) {
-        setOtpVerify(true);
-        toast.success("OTP verified successfully", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
-    } catch (err) {
-      console.error("Signup failed:", err);
-      toast.error("OTP varification faild!. Please try again.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (res.status === 200) {
+  //       setOtpVerify(true);
+  //       toast.success("OTP verified successfully", {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.error("Signup failed:", err);
+  //     toast.error("OTP varification faild!. Please try again.", {
+  //       position: "top-right",
+  //       autoClose: 3000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleGetOtp = async (email) => {
-    try {
-      if (!email) {
-        return toast.warning("Please enter email and otp", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      }
-      setLoading(true);
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/get-otp`,
-        {
-          email,
-        },
-        { withCredentials: true }
-      );
+  // const handleGetOtp = async (email) => {
+  //   try {
+  //     if (!email) {
+  //       return toast.warning("Please enter email and otp", {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //     }
+  //     setLoading(true);
+  //     const res = await axios.post(
+  //       `${import.meta.env.VITE_API_URL}/auth/get-otp`,
+  //       {
+  //         email,
+  //       },
+  //       { withCredentials: true }
+  //     );
 
-      if (res.status === 200) {
-        setGetOtp(true);
-        toast.success("OTP sent successfully", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setGetOtp(true);
-      }
-    } catch (err) {
-      console.error("Error to send OTP:", err);
-      toast.error("Error to send OTP. Please try again.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (res.status === 200) {
+  //       setGetOtp(true);
+  //       toast.success("OTP sent successfully", {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "light",
+  //       });
+  //       setGetOtp(true);
+  //     }
+  //   } catch (err) {
+  //     console.error("Error to send OTP:", err);
+  //     toast.error("Error to send OTP. Please try again.", {
+  //       position: "top-right",
+  //       autoClose: 3000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSignup = (e) => {
     e.preventDefault();
@@ -191,19 +191,19 @@ const Signup = () => {
     const nameVal = name.current.value?.trim();
     const emailVal = email.current.value?.trim();
     const passwordVal = password.current.value?.trim();
-    const otpVal = otp.current.value?.trim();
+    // const otpVal = otp.current.value?.trim();
 
-    // Step 1: Request OTP
-    if (nameVal && emailVal && otpVal === "" && passwordVal === "") {
-      handleGetOtp(emailVal);
-      return;
-    }
+    // // Step 1: Request OTP
+    // if (nameVal && emailVal && otpVal === "" && passwordVal === "") {
+    //   handleGetOtp(emailVal);
+    //   return;
+    // }
 
-    // Step 2: Verify OTP
-    if (nameVal && emailVal && otpVal && passwordVal === "") {
-      handleOtpVerify(otpVal, emailVal);
-      return;
-    }
+    // // Step 2: Verify OTP
+    // if (nameVal && emailVal && otpVal && passwordVal === "") {
+    //   handleOtpVerify(otpVal, emailVal);
+    //   return;
+    // }
 
     // Step 3: Final Signup
     if (nameVal && emailVal && passwordVal) {
@@ -250,22 +250,22 @@ const Signup = () => {
             className={styles.input}
             ref={email}
             required
-            disabled={getOtp}
+            // disabled={getOtp}
           />
 
-          <input
+          {/* <input
             type="number"
             placeholder="OTP"
             className={styles.input}
             hidden={!getOtp}
             ref={otp}
-          />
+          /> */}
 
           <input
             type="password"
             placeholder="Password (min 6 characters)"
             className={styles.input}
-            hidden={!otpVerify}
+            // hidden={!otpVerify}
             minLength={6}
             ref={password}
             autoComplete="new-password"
@@ -283,13 +283,9 @@ const Signup = () => {
           >
             {loading ? (
               <FaSpinner className={loading ? styles.spinner : ""} />
-            ) : getOtp && !otpVerify ? (
-              "Verify OTP"
-            ) : otpVerify ? (
-              "Sign Up"
             ) : (
-              "Get OTP"
-            )}
+              "Sign Up"
+            )}{" "}
           </button>
         </form>
 
